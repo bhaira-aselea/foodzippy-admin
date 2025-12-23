@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { api, normalizeVendor } from '@/lib/api';
+import MapPreview from '@/components/MapPreview';
 import {
   Select,
   SelectContent,
@@ -448,10 +449,12 @@ export default function VendorEdit() {
             </div>
           </div>
           {/* Map Preview */}
-          <div className="mt-4 h-48 bg-muted rounded-lg flex items-center justify-center">
-            <p className="text-muted-foreground text-sm">
-              Map Preview ({vendor.latitude}, {vendor.longitude})
-            </p>
+          <div className="mt-4">
+            <MapPreview 
+              latitude={vendor.latitude} 
+              longitude={vendor.longitude} 
+              title={vendor.restaurantName}
+            />
           </div>
         </div>
 
