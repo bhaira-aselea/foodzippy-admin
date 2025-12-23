@@ -299,12 +299,31 @@ export default function VendorDetail() {
             </div>
           </div>
 
+          {/* Agent Information */}
+          {vendor.agentName && (
+            <div className="bg-card rounded-xl border p-6">
+              <h2 className="text-lg font-semibold mb-4">Agent Information</h2>
+              <div className="text-sm">
+                <p className="text-muted-foreground">Agent Name</p>
+                <p className="font-medium">{vendor.agentName}</p>
+              </div>
+            </div>
+          )}
+
           {/* Submitted Info */}
           <div className="bg-card rounded-xl border p-6">
             <h2 className="text-lg font-semibold mb-4">Submission Info</h2>
             <div className="text-sm">
               <p className="text-muted-foreground">Submitted Date</p>
-              <p className="font-medium">{new Date(vendor.submittedDate).toLocaleDateString()}</p>
+              <p className="font-medium">
+                {vendor.createdAt 
+                  ? new Date(vendor.createdAt).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })
+                  : 'Not available'}
+              </p>
             </div>
           </div>
         </div>

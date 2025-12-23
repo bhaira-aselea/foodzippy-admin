@@ -537,6 +537,20 @@ export default function VendorEdit() {
             </div>
           </div>
         </div>
+
+        {/* Agent Information */}
+        <div className="bg-card rounded-xl border p-6">
+          <h2 className="text-lg font-semibold mb-4">Agent Information</h2>
+          <div className="space-y-2">
+            <Label htmlFor="agentName">Agent Name</Label>
+            <Input
+              id="agentName"
+              value={vendor.agentName || ''}
+              onChange={(e) => updateField('agentName', e.target.value)}
+              placeholder="Enter agent name"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
