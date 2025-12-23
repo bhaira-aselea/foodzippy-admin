@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Phone, Mail, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { api, normalizeVendor } from '@/lib/api';
+import MapPreview from '@/components/MapPreview';
 
 export default function VendorDetail() {
   const { id } = useParams<{ id: string }>();
@@ -221,11 +222,11 @@ export default function VendorDetail() {
               </div>
             </div>
             {/* Map Preview */}
-            <div className="h-48 bg-muted rounded-lg flex items-center justify-center">
-              <p className="text-muted-foreground text-sm">
-                Map Preview ({vendor.latitude}, {vendor.longitude})
-              </p>
-            </div>
+            <MapPreview 
+              latitude={vendor.latitude} 
+              longitude={vendor.longitude} 
+              title={vendor.restaurantName}
+            />
           </div>
         </div>
 
