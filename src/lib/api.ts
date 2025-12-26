@@ -159,6 +159,99 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  async getAgentById(id: string) {
+    return this.request<{
+      success: boolean;
+      agent: any;
+    }>(`/api/agents/${id}`);
+  }
+
+  // Attendance APIs
+  async getAgentAttendance(params?: {
+    agentId?: string;
+    month?: string;
+    year?: string;
+    status?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      success: boolean;
+      attendance: any[];
+      statistics: {
+        totalRecords: number;
+        uniqueAgents: number;
+        presentCount: number;
+        halfDayCount: number;
+        totalDuration: number;
+        averageDuration: number;
+      };
+    }>(`/api/admin/attendance${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async getAgentAttendanceById(agentId: string, params?: {
+    month?: string;
+    year?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      success: boolean;
+      attendance: any[];
+      statistics: {
+        totalDays: number;
+        presentDays: number;
+        halfDays: number;
+        totalHours: number;
+      };
+    }>(`/api/admin/attendance/${agentId}${queryString ? `?${queryString}` : ''}`);
+  }
+
+  // Edit Request APIs
+  async getPendingEditRequests() {
+    return this.request<{
+      success: boolean;
+      data: any[];
+      count: number;
+    }>('/api/admin/edit-requests/pending');
+  }
+
+  async approveVendorEdit(vendorId: string, remark?: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`/api/admin/edit-requests/${vendorId}/approve`, {
+      method: 'PATCH',
+      body: JSON.stringify({ remark }),
+    });
+  }
+
+  async rejectVendorEdit(vendorId: string, remark?: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`/api/admin/edit-requests/${vendorId}/reject`, {
+      method: 'PATCH',
+      body: JSON.stringify({ remark }),
+    });
+  }
 }
 
 export const api = new ApiClient();

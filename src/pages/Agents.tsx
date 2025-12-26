@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Plus, Search, Users, Eye } from 'lucide-react';
+import { Pencil, Trash2, Plus, Search, Users, Eye, UserCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +40,8 @@ interface Agent {
   _id: string;
   name: string;
   username: string;
+  email?: string;
+  profileImage?: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -109,8 +111,7 @@ export default function Agents() {
         description: 'Agent created successfully',
       });
 
-      setIsCreateDialogOpen(false);
-      resetForm();
+      closeCreateDialog();
       loadAgents();
     } catch (error: any) {
       toast({
@@ -118,7 +119,6 @@ export default function Agents() {
         description: error.message || 'Failed to create agent',
         variant: 'destructive',
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -153,9 +153,7 @@ export default function Agents() {
         description: 'Agent updated successfully',
       });
 
-      setIsEditDialogOpen(false);
-      setSelectedAgent(null);
-      resetForm();
+      closeEditDialog();
       loadAgents();
     } catch (error: any) {
       toast({
@@ -163,7 +161,6 @@ export default function Agents() {
         description: error.message || 'Failed to update agent',
         variant: 'destructive',
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -197,6 +194,19 @@ export default function Agents() {
   const openCreateDialog = () => {
     resetForm();
     setIsCreateDialogOpen(true);
+  };
+
+  const closeCreateDialog = () => {
+    setIsCreateDialogOpen(false);
+    setIsSubmitting(false);
+    resetForm();
+  };
+
+  const closeEditDialog = () => {
+    setIsEditDialogOpen(false);
+    setIsSubmitting(false);
+    setSelectedAgent(null);
+    resetForm();
   };
 
   const openEditDialog = (agent: Agent) => {
@@ -296,7 +306,7 @@ export default function Agents() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
+              <TableHead>Agent</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created Date</TableHead>
@@ -319,7 +329,29 @@ export default function Agents() {
             ) : (
               filteredAgents.map((agent) => (
                 <TableRow key={agent._id}>
-                  <TableCell className="font-medium">{agent.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 flex-shrink-0">
+                        {agent.profileImage ? (
+                          <img 
+                            src={agent.profileImage} 
+                            alt={agent.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+                            <UserCircle className="w-6 h-6 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{agent.name}</p>
+                        {agent.email && (
+                          <p className="text-xs text-muted-foreground">{agent.email}</p>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell>{agent.username}</TableCell>
                   <TableCell>
                     <Badge variant={agent.isActive ? 'default' : 'secondary'}>
@@ -329,6 +361,14 @@ export default function Agents() {
                   <TableCell>{formatDate(agent.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/agent-profile/${agent._id}`)}
+                        title="View Profile & Attendance"
+                      >
+                        <UserCircle className="w-4 h-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -363,7 +403,7 @@ export default function Agents() {
       </div>
 
       {/* Create Agent Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={(open) => !open && closeCreateDialog()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Agent</DialogTitle>
@@ -408,7 +448,7 @@ export default function Agents() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+            <Button variant="outline" onClick={closeCreateDialog} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button onClick={handleCreateAgent} disabled={isSubmitting}>
@@ -419,7 +459,7 @@ export default function Agents() {
       </Dialog>
 
       {/* Edit Agent Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => !open && closeEditDialog()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Agent</DialogTitle>
@@ -472,7 +512,7 @@ export default function Agents() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button variant="outline" onClick={closeEditDialog} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button onClick={handleEditAgent} disabled={isSubmitting}>

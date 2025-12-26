@@ -13,6 +13,9 @@ import AllVendors from "./pages/AllVendors";
 import VendorDetail from "./pages/VendorDetail";
 import VendorEdit from "./pages/VendorEdit";
 import Agents from "./pages/Agents";
+import AgentAttendance from "./pages/AgentAttendance";
+import AgentProfileDetail from "./pages/AgentProfileDetail";
+import EditRequests from "./pages/EditRequests";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +39,9 @@ const App = () => (
               <Route path="/vendor/:id" element={<VendorDetail />} />
               <Route path="/vendor/:id/edit" element={<VendorEdit />} />
               <Route path="/agents" element={<Agents />} />
+              <Route path="/agent-attendance" element={<AgentAttendance />} />
+              <Route path="/agent-profile/:id" element={<AgentProfileDetail />} />
+              <Route path="/edit-requests" element={<EditRequests />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
