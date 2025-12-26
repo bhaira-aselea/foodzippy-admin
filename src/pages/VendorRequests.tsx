@@ -127,6 +127,7 @@ export default function VendorRequests() {
               <TableHead>Restaurant Name</TableHead>
               <TableHead>City</TableHead>
               <TableHead>Mobile Number</TableHead>
+              <TableHead>Agent</TableHead>
               <TableHead>Categories</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Submitted Date</TableHead>
@@ -136,13 +137,13 @@ export default function VendorRequests() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   <div className="animate-pulse text-muted-foreground">Loading...</div>
                 </TableCell>
               </TableRow>
             ) : vendors.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   No vendor requests found
                 </TableCell>
               </TableRow>
@@ -152,6 +153,13 @@ export default function VendorRequests() {
                   <TableCell className="font-medium">{vendor.restaurantName}</TableCell>
                   <TableCell>{vendor.city}</TableCell>
                   <TableCell>{vendor.mobileNumber}</TableCell>
+                  <TableCell>
+                    {vendor.agentName ? (
+                      <span className="text-sm font-medium">{vendor.agentName}</span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic">No agent</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {vendor.categories.slice(0, 2).map((cat: string) => (

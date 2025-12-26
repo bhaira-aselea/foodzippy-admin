@@ -86,6 +86,14 @@ class ApiClient {
     );
   }
 
+  async getVendorsByAgent(agentId: string) {
+    return this.request<{
+      success: boolean;
+      data: any[];
+      count: number;
+    }>(`/api/admin/vendors?agentId=${agentId}`);
+  }
+
   async getVendorById(id: string) {
     return this.request<ApiResponse<any>>(`/api/admin/vendors/${id}`);
   }
@@ -110,6 +118,46 @@ class ApiClient {
         };
       };
     }>('/api/admin/vendors/analytics');
+  }
+
+  // Agent APIs
+  async getAgents() {
+    return this.request<{
+      success: boolean;
+      agents: any[];
+      count: number;
+    }>('/api/agents');
+  }
+
+  async createAgent(data: { name: string; username: string; password: string }) {
+    return this.request<{
+      success: boolean;
+      agent: any;
+      message: string;
+    }>('/api/agents', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateAgent(id: string, data: any) {
+    return this.request<{
+      success: boolean;
+      agent: any;
+      message: string;
+    }>(`/api/agents/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteAgent(id: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>(`/api/agents/${id}`, {
+      method: 'DELETE',
+    });
   }
 }
 

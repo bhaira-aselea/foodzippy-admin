@@ -12,6 +12,7 @@ import VendorRequests from "./pages/VendorRequests";
 import AllVendors from "./pages/AllVendors";
 import VendorDetail from "./pages/VendorDetail";
 import VendorEdit from "./pages/VendorEdit";
+import Agents from "./pages/Agents";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/vendors" element={<AllVendors />} />
               <Route path="/vendor/:id" element={<VendorDetail />} />
               <Route path="/vendor/:id/edit" element={<VendorEdit />} />
+              <Route path="/agents" element={<Agents />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
