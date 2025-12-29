@@ -129,6 +129,54 @@ class ApiClient {
     }>('/api/agents');
   }
 
+  // User APIs (New unified system for agents & employees)
+  async getUsers(role?: 'agent' | 'employee') {
+    const queryString = role ? `?role=${role}` : '';
+    return this.request<{
+      success: boolean;
+      users: any[];
+      count: number;
+    }>(`/api/admin/users${queryString}`);
+  }
+
+  async createUser(data: { name: string; username: string; password: string; role: 'agent' | 'employee'; mobileNumber?: string; email?: string; dob?: string }) {
+    return this.request<{
+      success: boolean;
+      user: any;
+      message: string;
+    }>('/api/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateUserById(id: string, data: any) {
+    return this.request<{
+      success: boolean;
+      user: any;
+      message: string;
+    }>(`/api/admin/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteUserById(id: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>(`/api/admin/users/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getUserByIdAdmin(id: string) {
+    return this.request<{
+      success: boolean;
+      user: any;
+    }>(`/api/admin/users/${id}`);
+  }
+
   async createAgent(data: { name: string; username: string; password: string }) {
     return this.request<{
       success: boolean;
@@ -220,6 +268,36 @@ class ApiClient {
         totalHours: number;
       };
     }>(`/api/admin/attendance/${agentId}${queryString ? `?${queryString}` : ''}`);
+  }
+
+  // User Attendance APIs (for new unified system)
+  async getUserAttendance(params?: {
+    role?: 'agent' | 'employee';
+    month?: string;
+    year?: string;
+    status?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      success: boolean;
+      attendance: any[];
+      statistics: {
+        totalRecords: number;
+        uniqueUsers: number;
+        presentCount: number;
+        halfDayCount: number;
+        totalDuration: number;
+        averageDuration: number;
+      };
+    }>(`/api/admin/users-attendance${queryString ? `?${queryString}` : ''}`);
   }
 
   // Edit Request APIs

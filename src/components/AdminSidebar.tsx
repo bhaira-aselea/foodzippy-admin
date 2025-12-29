@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, ClipboardList, LogOut, UserCog, ClipboardCheck, FileEdit } from 'lucide-react';
+import { LayoutDashboard, Users, ClipboardList, LogOut, UserCog, ClipboardCheck, FileEdit, Briefcase } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,7 @@ const navItems = [
   { title: 'All Vendors', url: '/vendors', icon: Users },
   { title: 'Agents', url: '/agents', icon: UserCog },
   { title: 'Agent Attendance', url: '/agent-attendance', icon: ClipboardCheck },
+  { title: 'Employee Attendance', url: '/employee-attendance', icon: Briefcase },
   { title: 'Edit Requests', url: '/edit-requests', icon: FileEdit },
 ];
 

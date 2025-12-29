@@ -43,6 +43,7 @@ interface Agent {
   email?: string;
   profileImage?: string;
   isActive: boolean;
+  role: 'agent' | 'employee';
   createdAt: string;
 }
 
@@ -52,6 +53,7 @@ export default function Agents() {
   const [search, setSearch] = useState('');
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'agent' | 'employee'>('agent');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -69,17 +71,17 @@ export default function Agents() {
 
   useEffect(() => {
     loadAgents();
-  }, []);
+  }, [activeTab]);
 
   const loadAgents = async () => {
     try {
       setIsLoading(true);
-      const response = await api.getAgents();
-      setAgents(response.agents);
+      const response = await api.getUsers(activeTab);
+      setAgents(response.users || []);
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to load agents',
+        description: error.message || `Failed to load ${activeTab}s`,
         variant: 'destructive',
       });
       setAgents([]);
@@ -100,15 +102,16 @@ export default function Agents() {
 
     try {
       setIsSubmitting(true);
-      await api.createAgent({
+      await api.createUser({
         name: formData.name,
         username: formData.username,
         password: formData.password,
+        role: activeTab,
       });
 
       toast({
         title: 'Success',
-        description: 'Agent created successfully',
+        description: `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} created successfully`,
       });
 
       closeCreateDialog();
@@ -116,7 +119,7 @@ export default function Agents() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create agent',
+        description: error.message || `Failed to create ${activeTab}`,
         variant: 'destructive',
       });
       setIsSubmitting(false);
@@ -146,11 +149,11 @@ export default function Agents() {
         updateData.password = formData.password;
       }
 
-      await api.updateAgent(selectedAgent._id, updateData);
+      await api.updateUserById(selectedAgent._id, updateData);
 
       toast({
         title: 'Success',
-        description: 'Agent updated successfully',
+        description: `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} updated successfully`,
       });
 
       closeEditDialog();
@@ -170,11 +173,11 @@ export default function Agents() {
 
     try {
       setIsSubmitting(true);
-      await api.deleteAgent(selectedAgent._id);
+      await api.deleteUserById(selectedAgent._id);
 
       toast({
         title: 'Success',
-        description: 'Agent deleted successfully',
+        description: `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} deleted successfully`,
       });
 
       setIsDeleteDialogOpen(false);
@@ -183,7 +186,7 @@ export default function Agents() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete agent',
+        description: error.message || `Failed to delete ${activeTab}`,
         variant: 'destructive',
       });
     } finally {
@@ -277,15 +280,41 @@ export default function Agents() {
   return (
     <div className="p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Agent Management</h1>
-          <p className="text-muted-foreground">Manage agents who handle vendor registrations</p>
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">User Management</h1>
+            <p className="text-muted-foreground">Manage agents and employees who handle vendor registrations</p>
+          </div>
+          <Button onClick={openCreateDialog}>
+            <Plus className="w-4 h-4 mr-2" />
+            Create {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+          </Button>
         </div>
-        <Button onClick={openCreateDialog}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create Agent
-        </Button>
+
+        {/* Tabs */}
+        <div className="mt-4 flex gap-2 border-b">
+          <button
+            onClick={() => setActiveTab('agent')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'agent'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Agents
+          </button>
+          <button
+            onClick={() => setActiveTab('employee')}
+            className={`px-4 py-2 font-medium transition-colors ${
+              activeTab === 'employee'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Employees
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -402,13 +431,13 @@ export default function Agents() {
         </Table>
       </div>
 
-      {/* Create Agent Dialog */}
+      {/* Create User Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={(open) => !open && closeCreateDialog()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Agent</DialogTitle>
+            <DialogTitle>Create New {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</DialogTitle>
             <DialogDescription>
-              Add a new agent who can handle vendor registrations
+              Add a new {activeTab} who can handle vendor registrations
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -458,13 +487,13 @@ export default function Agents() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Agent Dialog */}
+      {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={(open) => !open && closeEditDialog()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Agent</DialogTitle>
+            <DialogTitle>Edit {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</DialogTitle>
             <DialogDescription>
-              Update agent information and status
+              Update {activeTab} information
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

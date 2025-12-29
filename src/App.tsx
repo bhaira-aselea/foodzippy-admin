@@ -14,6 +14,7 @@ import VendorDetail from "./pages/VendorDetail";
 import VendorEdit from "./pages/VendorEdit";
 import Agents from "./pages/Agents";
 import AgentAttendance from "./pages/AgentAttendance";
+import EmployeeAttendance from "./pages/EmployeeAttendance";
 import AgentProfileDetail from "./pages/AgentProfileDetail";
 import EditRequests from "./pages/EditRequests";
 import NotFound from "./pages/NotFound";
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/vendor/:id/edit" element={<VendorEdit />} />
               <Route path="/agents" element={<Agents />} />
               <Route path="/agent-attendance" element={<AgentAttendance />} />
+              <Route path="/employee-attendance" element={<EmployeeAttendance />} />
               <Route path="/agent-profile/:id" element={<AgentProfileDetail />} />
               <Route path="/edit-requests" element={<EditRequests />} />
             </Route>
