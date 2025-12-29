@@ -26,14 +26,13 @@ export function AdminSidebar() {
     <aside className="w-64 min-h-screen bg-sidebar flex flex-col border-r border-sidebar-border">
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">F</span>
-          </div>
-          <div>
-            <h1 className="text-sidebar-foreground font-semibold text-lg">Foodzippy</h1>
-            <p className="text-sidebar-foreground/60 text-xs">Admin Panel</p>
-          </div>
+        <div className="flex flex-col items-center gap-2">
+          <img 
+            src="/foodzippy-logo.png" 
+            alt="Foodzippy Logo" 
+            className="h-40 w-auto object-contain"
+          />
+          <p className="text-white text-sm font-medium">Admin Panel</p>
         </div>
       </div>
 
