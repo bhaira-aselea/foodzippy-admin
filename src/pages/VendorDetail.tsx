@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Phone, Mail, Star } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, Star, Calendar, MessageSquare, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { api, normalizeVendor } from '@/lib/api';
@@ -299,13 +299,29 @@ export default function VendorDetail() {
             </div>
           </div>
 
-          {/* Agent Information */}
-          {vendor.agentName && (
+          {/* Agent/Employee Information */}
+          {(vendor.createdByName || vendor.agentName) && (
             <div className="bg-card rounded-xl border p-6">
-              <h2 className="text-lg font-semibold mb-4">Agent Information</h2>
-              <div className="text-sm">
-                <p className="text-muted-foreground">Agent Name</p>
-                <p className="font-medium">{vendor.agentName}</p>
+              <h2 className="text-lg font-semibold mb-4">
+                {vendor.createdByRole === 'employee' ? 'Employee' : 'Agent'} Information
+              </h2>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Name</p>
+                  <p className="font-medium">{vendor.createdByName || vendor.agentName}</p>
+                </div>
+                {vendor.createdByUsername && (
+                  <div>
+                    <p className="text-muted-foreground">Username</p>
+                    <p className="font-medium">{vendor.createdByUsername}</p>
+                  </div>
+                )}
+                {vendor.createdByRole && (
+                  <div>
+                    <p className="text-muted-foreground">Role</p>
+                    <p className="font-medium capitalize">{vendor.createdByRole}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -326,6 +342,85 @@ export default function VendorDetail() {
               </p>
             </div>
           </div>
+
+          {/* Review Section */}
+          {vendor.review && (
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-blue-600" />
+                Review Details
+              </h2>
+              <div className="space-y-4">
+                {/* Follow-up Date */}
+                <div>
+                  <p className="text-sm text-muted-foreground flex items-center gap-2 mb-1">
+                    <Calendar className="w-4 h-4" />
+                    Follow-Up Date
+                  </p>
+                  <p className="font-semibold text-blue-700">
+                    {new Date(vendor.review.followUpDate).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+
+                {/* Convincing Status */}
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Convincing Status</p>
+                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    vendor.review.convincingStatus === 'convenience' 
+                      ? 'bg-green-100 text-green-700 border border-green-300'
+                      : vendor.review.convincingStatus === 'convertible'
+                      ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
+                      : 'bg-red-100 text-red-700 border border-red-300'
+                  }`}>
+                    {vendor.review.convincingStatus === 'convenience' && '✓ Convenience'}
+                    {vendor.review.convincingStatus === 'convertible' && '↻ Convertible'}
+                    {vendor.review.convincingStatus === 'not_convertible' && '✗ Not Convertible'}
+                  </span>
+                </div>
+
+                {/* Behavior */}
+                <div>
+                  <p className="text-sm text-muted-foreground flex items-center gap-2 mb-1">
+                    <Smile className="w-4 h-4" />
+                    Way of Behavior
+                  </p>
+                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    vendor.review.behavior === 'excellent' 
+                      ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                      : vendor.review.behavior === 'good'
+                      ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                      : 'bg-orange-100 text-orange-700 border border-orange-300'
+                  }`}>
+                    {vendor.review.behavior === 'excellent' && '⭐ Excellent'}
+                    {vendor.review.behavior === 'good' && '👍 Good'}
+                    {vendor.review.behavior === 'rude' && '⚠️ Rude'}
+                  </span>
+                </div>
+
+                {/* Voice Note */}
+                {vendor.review.audioUrl && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Voice Note</p>
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
+                      <audio 
+                        controls 
+                        src={vendor.review.audioUrl} 
+                        className="w-full"
+                        style={{ height: '40px' }}
+                      >
+                        Your browser does not support audio playback.
+                      </audio>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

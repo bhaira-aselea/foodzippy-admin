@@ -69,7 +69,7 @@ export default function AllVendors() {
               <TableHead>Restaurant</TableHead>
               <TableHead>City</TableHead>
               <TableHead>Rating</TableHead>
-              <TableHead>Categories</TableHead>
+              <TableHead>Follow-Up Date</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
@@ -108,16 +108,17 @@ export default function AllVendors() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {vendor.categories.slice(0, 2).map((cat) => (
-                        <span
-                          key={cat}
-                          className="inline-block px-2 py-0.5 text-xs bg-muted rounded"
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
+                    {vendor.review?.followUpDate ? (
+                      <span className="text-sm font-medium text-slate-700">
+                        {new Date(vendor.review.followUpDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not set</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={vendor.restaurantStatus} />

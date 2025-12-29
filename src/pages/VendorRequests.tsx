@@ -128,7 +128,7 @@ export default function VendorRequests() {
               <TableHead>City</TableHead>
               <TableHead>Mobile Number</TableHead>
               <TableHead>Agent</TableHead>
-              <TableHead>Categories</TableHead>
+              <TableHead>Follow-Up Date</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Submitted Date</TableHead>
               <TableHead className="text-right">Action</TableHead>
@@ -154,28 +154,46 @@ export default function VendorRequests() {
                   <TableCell>{vendor.city}</TableCell>
                   <TableCell>{vendor.mobileNumber}</TableCell>
                   <TableCell>
-                    {vendor.agentName ? (
-                      <span className="text-sm font-medium">{vendor.agentName}</span>
+                    {vendor.createdByName || vendor.agentName ? (
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {vendor.createdByName || vendor.agentName}
+                        </span>
+                        {vendor.createdByRole && (
+                          <span className="text-xs text-muted-foreground capitalize">
+                            ({vendor.createdByRole})
+                          </span>
+                        )}
+                      </div>
                     ) : (
                       <span className="text-xs text-muted-foreground italic">No agent</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {vendor.categories.slice(0, 2).map((cat: string) => (
-                        <span
-                          key={cat}
-                          className="inline-block px-2 py-0.5 text-xs bg-muted rounded"
-                        >
-                          {cat}
+                    {vendor.review?.followUpDate ? (
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-blue-700">
+                          {new Date(vendor.review.followUpDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
                         </span>
-                      ))}
-                      {vendor.categories.length > 2 && (
-                        <span className="text-xs text-muted-foreground">
-                          +{vendor.categories.length - 2}
+                        <span className={`text-xs ${
+                          vendor.review.convincingStatus === 'convenience' 
+                            ? 'text-green-600'
+                            : vendor.review.convincingStatus === 'convertible'
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
+                        }`}>
+                          {vendor.review.convincingStatus === 'convenience' && '✓ Convenience'}
+                          {vendor.review.convincingStatus === 'convertible' && '↻ Convertible'}
+                          {vendor.review.convincingStatus === 'not_convertible' && '✗ Not Conv.'}
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not set</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={vendor.restaurantStatus} />
