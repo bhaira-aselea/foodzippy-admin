@@ -86,12 +86,27 @@ class ApiClient {
     );
   }
 
-  async getVendorsByAgent(agentId: string) {
+  async getVendorsByAgent(agentId: string, params?: {
+    status?: string;
+    dateFilter?: string;
+    followUpFilter?: string;
+    includeStats?: string;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams({ agentId });
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
     return this.request<{
       success: boolean;
       data: any[];
-      count: number;
-    }>(`/api/admin/vendors?agentId=${agentId}`);
+      statistics?: any;
+      pagination?: any;
+    }>(`/api/admin/vendors?${queryParams.toString()}`);
   }
 
   async getVendorById(id: string) {
@@ -268,6 +283,31 @@ class ApiClient {
         totalHours: number;
       };
     }>(`/api/admin/attendance/${agentId}${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async getUserAttendanceById(userId: string, params?: {
+    month?: string;
+    year?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      success: boolean;
+      attendance: any[];
+      statistics: {
+        totalDays: number;
+        presentDays: number;
+        halfDays: number;
+        totalHours: number;
+      };
+    }>(`/api/admin/users-attendance/${userId}${queryString ? `?${queryString}` : ''}`);
   }
 
   // User Attendance APIs (for new unified system)

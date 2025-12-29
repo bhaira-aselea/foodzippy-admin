@@ -35,6 +35,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Agent {
   _id: string;
@@ -61,6 +69,10 @@ export default function Agents() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [agentVendors, setAgentVendors] = useState<any[]>([]);
   const [isLoadingVendors, setIsLoadingVendors] = useState(false);
+  const [vendorTab, setVendorTab] = useState<'registered' | 'requests' | 'followups'>('registered');
+  const [requestsDateFilter, setRequestsDateFilter] = useState<string>('all');
+  const [followUpDateFilter, setFollowUpDateFilter] = useState<string>('all');
+  const [vendorStats, setVendorStats] = useState<any>({});
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -231,12 +243,47 @@ export default function Agents() {
   const openVendorsDialog = async (agent: Agent) => {
     setSelectedAgent(agent);
     setIsVendorsDialogOpen(true);
+    setVendorTab('registered');
+    setRequestsDateFilter('all');
+    setFollowUpDateFilter('all');
     
-    // Load vendors for this agent
+    // Load vendors for this agent with statistics
+    await loadAgentVendors(agent._id, 'registered', 'all', 'all');
+  };
+
+  const loadAgentVendors = async (
+    agentId: string, 
+    tab: 'registered' | 'requests' | 'followups',
+    requestsFilter: string,
+    followUpFilter: string
+  ) => {
     try {
       setIsLoadingVendors(true);
-      const response = await api.getVendorsByAgent(agent._id);
+      
+      let queryParams: any = {
+        agentId,
+        includeStats: 'true',
+        limit: 100 // Get more results for better overview
+      };
+
+      if (tab === 'registered') {
+        // Only approved vendors
+        queryParams.status = 'publish';
+      } else if (tab === 'requests') {
+        // All vendors with optional date filter
+        if (requestsFilter !== 'all') {
+          queryParams.dateFilter = requestsFilter;
+        }
+      } else if (tab === 'followups') {
+        // Vendors with follow-up dates, with optional date filter
+        if (followUpFilter !== 'all') {
+          queryParams.followUpFilter = followUpFilter;
+        }
+      }
+
+      const response = await api.getVendorsByAgent(agentId, queryParams);
       setAgentVendors(normalizeVendors(response.data || []));
+      setVendorStats(response.statistics || {});
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -244,8 +291,31 @@ export default function Agents() {
         variant: 'destructive',
       });
       setAgentVendors([]);
+      setVendorStats({});
     } finally {
       setIsLoadingVendors(false);
+    }
+  };
+
+  const handleTabChange = (value: string) => {
+    const newTab = value as 'registered' | 'requests' | 'followups';
+    setVendorTab(newTab);
+    if (selectedAgent) {
+      loadAgentVendors(selectedAgent._id, newTab, requestsDateFilter, followUpDateFilter);
+    }
+  };
+
+  const handleRequestsFilterChange = (value: string) => {
+    setRequestsDateFilter(value);
+    if (selectedAgent) {
+      loadAgentVendors(selectedAgent._id, 'requests', value, followUpDateFilter);
+    }
+  };
+
+  const handleFollowUpFilterChange = (value: string) => {
+    setFollowUpDateFilter(value);
+    if (selectedAgent) {
+      loadAgentVendors(selectedAgent._id, 'followups', requestsDateFilter, value);
     }
   };
 
@@ -576,61 +646,266 @@ export default function Agents() {
 
       {/* Agent Vendors Dialog */}
       <Dialog open={isVendorsDialogOpen} onOpenChange={setIsVendorsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Vendors Registered by {selectedAgent?.name}</DialogTitle>
+            <DialogTitle>Vendors - {selectedAgent?.name}</DialogTitle>
             <DialogDescription>
-              Total vendors registered: <strong>{agentVendors.length}</strong>
+              View and manage vendor registrations, requests, and follow-ups
             </DialogDescription>
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto">
-            {isLoadingVendors ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-pulse text-muted-foreground">Loading vendors...</div>
-              </div>
-            ) : agentVendors.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No vendors registered by this agent yet
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Restaurant Name</TableHead>
-                    <TableHead>City</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {agentVendors.map((vendor) => (
-                    <TableRow key={vendor.id}>
-                      <TableCell className="font-medium">{vendor.restaurantName}</TableCell>
-                      <TableCell>{vendor.city}</TableCell>
-                      <TableCell>{vendor.mobileNumber}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={vendor.restaurantStatus} />
-                      </TableCell>
-                      <TableCell>
-                        {vendor.createdAt ? new Date(vendor.createdAt).toLocaleDateString() : 'N/A'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewVendor(vendor.id)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
+          
+          <Tabs value={vendorTab} onValueChange={handleTabChange} className="flex-1 flex flex-col overflow-hidden">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="registered" className="relative">
+                Vendors Registered
+                {vendorStats.approved > 0 && (
+                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                    {vendorStats.approved}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="requests" className="relative">
+                Requests
+                {vendorStats.totalRequests > 0 && (
+                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                    {vendorStats.totalRequests}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="followups" className="relative">
+                Follow-Up Dates
+                {vendorStats.totalWithFollowUp > 0 && (
+                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                    {vendorStats.totalWithFollowUp}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Registered Vendors Tab */}
+            <TabsContent value="registered" className="flex-1 overflow-y-auto mt-4">
+              {isLoadingVendors ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-pulse text-muted-foreground">Loading vendors...</div>
+                </div>
+              ) : agentVendors.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No approved vendors yet
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Restaurant Name</TableHead>
+                      <TableHead>City</TableHead>
+                      <TableHead>Mobile</TableHead>
+                      <TableHead>Date Approved</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {agentVendors.map((vendor) => (
+                      <TableRow key={vendor.id}>
+                        <TableCell className="font-medium">{vendor.restaurantName}</TableCell>
+                        <TableCell>{vendor.city}</TableCell>
+                        <TableCell>{vendor.mobileNumber}</TableCell>
+                        <TableCell>
+                          {vendor.createdAt ? new Date(vendor.createdAt).toLocaleDateString() : 'N/A'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewVendor(vendor.id)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+
+            {/* Requests Tab */}
+            <TabsContent value="requests" className="flex-1 overflow-y-auto mt-4 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="requests-filter">Filter by Date:</Label>
+                  <Select value={requestsDateFilter} onValueChange={handleRequestsFilterChange}>
+                    <SelectTrigger id="requests-filter" className="w-[150px]">
+                      <SelectValue placeholder="Select filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="daily">Today</SelectItem>
+                      <SelectItem value="weekly">This Week</SelectItem>
+                      <SelectItem value="monthly">This Month</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex gap-2 ml-auto">
+                  <Badge variant="outline" className="bg-yellow-50">
+                    Pending: {vendorStats.pending || 0}
+                  </Badge>
+                  <Badge variant="outline" className="bg-green-50">
+                    Approved: {vendorStats.approved || 0}
+                  </Badge>
+                  <Badge variant="outline" className="bg-red-50">
+                    Rejected: {vendorStats.rejected || 0}
+                  </Badge>
+                </div>
+              </div>
+
+              {isLoadingVendors ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-pulse text-muted-foreground">Loading requests...</div>
+                </div>
+              ) : agentVendors.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No vendor requests for selected filter
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Restaurant Name</TableHead>
+                      <TableHead>City</TableHead>
+                      <TableHead>Mobile</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Submitted Date</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {agentVendors.map((vendor) => (
+                      <TableRow key={vendor.id}>
+                        <TableCell className="font-medium">{vendor.restaurantName}</TableCell>
+                        <TableCell>{vendor.city}</TableCell>
+                        <TableCell>{vendor.mobileNumber}</TableCell>
+                        <TableCell>
+                          <StatusBadge status={vendor.restaurantStatus} />
+                        </TableCell>
+                        <TableCell>
+                          {vendor.createdAt ? new Date(vendor.createdAt).toLocaleDateString() : 'N/A'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewVendor(vendor.id)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+
+            {/* Follow-Ups Tab */}
+            <TabsContent value="followups" className="flex-1 overflow-y-auto mt-4 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="followup-filter">Filter by Date:</Label>
+                  <Select value={followUpDateFilter} onValueChange={handleFollowUpFilterChange}>
+                    <SelectTrigger id="followup-filter" className="w-[150px]">
+                      <SelectValue placeholder="Select filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Upcoming</SelectItem>
+                      <SelectItem value="daily">Today</SelectItem>
+                      <SelectItem value="weekly">This Week</SelectItem>
+                      <SelectItem value="monthly">This Month</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex gap-2 ml-auto">
+                  <Badge variant="outline" className="bg-orange-50">
+                    Today: {vendorStats.followUpToday || 0}
+                  </Badge>
+                  <Badge variant="outline" className="bg-blue-50">
+                    This Week: {vendorStats.followUpWeek || 0}
+                  </Badge>
+                  <Badge variant="outline" className="bg-purple-50">
+                    This Month: {vendorStats.followUpMonth || 0}
+                  </Badge>
+                </div>
+              </div>
+
+              {isLoadingVendors ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-pulse text-muted-foreground">Loading follow-ups...</div>
+                </div>
+              ) : agentVendors.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No follow-ups scheduled for selected filter
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Restaurant Name</TableHead>
+                      <TableHead>City</TableHead>
+                      <TableHead>Follow-Up Date</TableHead>
+                      <TableHead>Convincing Status</TableHead>
+                      <TableHead>Behavior</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {agentVendors
+                      .sort((a, b) => {
+                        const dateA = a.review?.followUpDate ? new Date(a.review.followUpDate).getTime() : 0;
+                        const dateB = b.review?.followUpDate ? new Date(b.review.followUpDate).getTime() : 0;
+                        return dateA - dateB;
+                      })
+                      .map((vendor) => (
+                        <TableRow key={vendor.id}>
+                          <TableCell className="font-medium">{vendor.restaurantName}</TableCell>
+                          <TableCell>{vendor.city}</TableCell>
+                          <TableCell className="font-medium">
+                            {vendor.review?.followUpDate 
+                              ? new Date(vendor.review.followUpDate).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric'
+                                })
+                              : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              vendor.review?.convincingStatus === 'convinced' ? 'default' : 
+                              vendor.review?.convincingStatus === 'partially_convinced' ? 'secondary' : 
+                              'outline'
+                            }>
+                              {vendor.review?.convincingStatus || 'N/A'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {vendor.review?.behavior || 'N/A'}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewVendor(vendor.id)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>

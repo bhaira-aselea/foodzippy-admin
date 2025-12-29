@@ -76,6 +76,7 @@ export default function AgentProfileDetail() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [attendanceStats, setAttendanceStats] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isNewSystem, setIsNewSystem] = useState<boolean | null>(null); // Track if it's User or Agent
   const [selectedMonth, setSelectedMonth] = useState((new Date().getMonth() + 1).toString());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -103,12 +104,22 @@ export default function AgentProfileDetail() {
 
   const loadAgentProfile = async () => {
     try {
-      const response = await api.getAgentById(id!);
-      setProfile(response.agent);
+      // Try User API first (new system)
+      try {
+        const response = await api.getUserByIdAdmin(id!);
+        setProfile(response.user);
+        setIsNewSystem(true);
+        return;
+      } catch {
+        // Fall back to Agent API (old system)
+        const response = await api.getAgentById(id!);
+        setProfile(response.agent);
+        setIsNewSystem(false);
+      }
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to load agent profile',
+        description: error.message || 'Failed to load profile',
         variant: 'destructive',
       });
     } finally {
@@ -117,13 +128,26 @@ export default function AgentProfileDetail() {
   };
 
   const loadAgentAttendance = async () => {
+    if (isNewSystem === null) return; // Wait until we know which system
+    
     try {
-      const response = await api.getAgentAttendanceById(id!, {
-        month: selectedMonth,
-        year: selectedYear,
-      });
-      setAttendance(response.attendance);
-      setAttendanceStats(response.statistics);
+      if (isNewSystem) {
+        // Use User attendance API
+        const response = await api.getUserAttendanceById(id!, {
+          month: selectedMonth,
+          year: selectedYear,
+        });
+        setAttendance(response.attendance);
+        setAttendanceStats(response.statistics);
+      } else {
+        // Use Agent attendance API
+        const response = await api.getAgentAttendanceById(id!, {
+          month: selectedMonth,
+          year: selectedYear,
+        });
+        setAttendance(response.attendance);
+        setAttendanceStats(response.statistics);
+      }
     } catch (error: any) {
       toast({
         title: 'Error',
