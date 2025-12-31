@@ -370,18 +370,123 @@ class ApiClient {
       body: JSON.stringify({ remark }),
     });
   }
+
+  // Form Configuration APIs
+  async getFormConfig(visibleTo?: string) {
+    const queryString = visibleTo ? `?visibleTo=${visibleTo}` : '';
+    return this.request<{
+      success: boolean;
+      data: any[];
+    }>(`/api/form/config${queryString}`);
+  }
+
+  async getAllSections() {
+    return this.request<{
+      success: boolean;
+      data: any[];
+    }>('/api/form/sections');
+  }
+
+  async createSection(sectionData: any) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>('/api/form/sections', {
+      method: 'POST',
+      body: JSON.stringify(sectionData),
+    });
+  }
+
+  async updateSection(sectionId: string, updateData: any) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`/api/form/sections/${sectionId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+  }
+
+  async deleteSection(sectionId: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>(`/api/form/sections/${sectionId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getFieldConfig(fieldId: string) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>(`/api/form/fields/${fieldId}`);
+  }
+
+  async createFieldConfig(fieldData: any) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>('/api/form/fields', {
+      method: 'POST',
+      body: JSON.stringify(fieldData),
+    });
+  }
+
+  async updateFieldConfig(fieldId: string, updateData: any) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>(`/api/form/fields/${fieldId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+  }
+
+  async deleteFieldConfig(fieldId: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>(`/api/form/fields/${fieldId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async updateFieldOrder(fields: Array<{ id: string; order: number }>) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>('/api/form/fields/reorder', {
+      method: 'POST',
+      body: JSON.stringify({ fields }),
+    });
+  }
 }
 
 export const api = new ApiClient();
 
 // Data normalization helpers
 export function normalizeVendor(vendor: any) {
+  // Flatten formData Map into the vendor object
+  const formData = vendor.formData || {};
+  
   return {
     ...vendor,
+    ...formData, // Spread formData fields into the vendor object
     id: vendor._id || vendor.id,
     restaurantImage: typeof vendor.restaurantImage === 'object' 
       ? vendor.restaurantImage.secure_url 
       : vendor.restaurantImage,
+    // Ensure arrays are always arrays (not undefined)
+    categories: formData.categories || vendor.categories || [],
+    services: formData.services || vendor.services || [],
+    // Convert latitude and longitude to numbers for Google Maps
+    latitude: parseFloat(vendor.latitude) || parseFloat(formData.latitude) || 0,
+    longitude: parseFloat(vendor.longitude) || parseFloat(formData.longitude) || 0,
   };
 }
 

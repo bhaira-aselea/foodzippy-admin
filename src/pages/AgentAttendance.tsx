@@ -29,14 +29,15 @@ interface LocationData {
 
 interface AttendanceRecord {
   _id: string;
-  agentId: {
+  userId: {
     _id: string;
     name: string;
     username: string;
-    email: string;
-    agentType: string;
+    email?: string;
+    role: string;
   };
-  agentName: string;
+  userName: string;
+  role: string;
   date: string;
   checkIn: string;
   checkOut: string | null;
@@ -67,6 +68,7 @@ export default function AgentAttendance() {
     try {
       setIsLoading(true);
       const params: any = {
+        role: 'agent',
         month: selectedMonth,
         year: selectedYear,
       };
@@ -75,9 +77,9 @@ export default function AgentAttendance() {
         params.status = statusFilter;
       }
 
-      const response = await api.getAgentAttendance(params);
+      const response = await api.getUserAttendance(params);
       setAttendance(response.attendance);
-      setStatistics(response.summary);
+      setStatistics(response.summary || response.statistics);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -127,8 +129,8 @@ export default function AgentAttendance() {
   };
 
   const filteredAttendance = attendance.filter((record) =>
-    record.agentName.toLowerCase().includes(search.toLowerCase()) ||
-    record.agentId?.username?.toLowerCase().includes(search.toLowerCase())
+    record.userName.toLowerCase().includes(search.toLowerCase()) ||
+    record.userId?.username?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -156,7 +158,7 @@ export default function AgentAttendance() {
             <p className="text-sm text-muted-foreground">Unique Agents</p>
             <Users className="w-5 h-5 text-muted-foreground" />
           </div>
-          <p className="text-3xl font-bold">{statistics.uniqueAgents || 0}</p>
+          <p className="text-3xl font-bold">{statistics.uniqueUsers || statistics.uniqueAgents || 0}</p>
         </div>
 
         <div className="bg-card rounded-xl border p-6">
@@ -284,13 +286,13 @@ export default function AgentAttendance() {
                   <TableRow key={record._id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{record.agentName}</p>
+                        <p className="font-medium">{record.userName}</p>
                         <p className="text-xs text-muted-foreground">
-                          @{record.agentId?.username}
+                          @{record.userId?.username}
                         </p>
-                        {record.agentId?.agentType && (
+                        {record.userId?.role && (
                           <Badge variant="secondary" className="mt-1 text-xs">
-                            {record.agentId.agentType}
+                            {record.userId.role}
                           </Badge>
                         )}
                       </div>

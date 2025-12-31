@@ -73,6 +73,7 @@ export default function Agents() {
   const [requestsDateFilter, setRequestsDateFilter] = useState<string>('all');
   const [followUpDateFilter, setFollowUpDateFilter] = useState<string>('all');
   const [vendorStats, setVendorStats] = useState<any>({});
+  const [vendorCounts, setVendorCounts] = useState<Record<string, number>>({});
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -89,7 +90,11 @@ export default function Agents() {
     try {
       setIsLoading(true);
       const response = await api.getUsers(activeTab);
-      setAgents(response.users || []);
+      const loadedAgents = response.users || [];
+      setAgents(loadedAgents);
+      
+      // Load vendor counts for both agents and employees
+      loadVendorCounts(loadedAgents);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -100,6 +105,27 @@ export default function Agents() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadVendorCounts = async (agentsList: Agent[]) => {
+    const counts: Record<string, number> = {};
+    
+    // Load vendor counts for each agent in parallel
+    await Promise.all(
+      agentsList.map(async (agent) => {
+        try {
+          const response = await api.getVendorsByAgent(agent._id, { 
+            status: 'pending', // Only count pending requests
+            includeStats: 'true' 
+          });
+          counts[agent._id] = response.data?.length || 0;
+        } catch (error) {
+          counts[agent._id] = 0;
+        }
+      })
+    );
+    
+    setVendorCounts(counts);
   };
 
   const handleCreateAgent = async () => {
@@ -473,8 +499,14 @@ export default function Agents() {
                         size="sm"
                         onClick={() => openVendorsDialog(agent)}
                         title="View Vendors"
+                        className="relative"
                       >
                         <Users className="w-4 h-4" />
+                        {vendorCounts[agent._id] > 0 && (
+                          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white">
+                            {vendorCounts[agent._id]}
+                          </span>
+                        )}
                       </Button>
                       <Button
                         variant="ghost"

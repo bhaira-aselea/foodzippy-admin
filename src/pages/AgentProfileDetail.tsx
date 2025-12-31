@@ -97,10 +97,10 @@ export default function AgentProfileDetail() {
   }, [id]);
 
   useEffect(() => {
-    if (id) {
+    if (id && isNewSystem !== null) {
       loadAgentAttendance();
     }
-  }, [id, selectedMonth, selectedYear]);
+  }, [id, selectedMonth, selectedYear, isNewSystem]);
 
   const loadAgentProfile = async () => {
     try {
@@ -212,7 +212,6 @@ export default function AgentProfileDetail() {
       const updateData: any = {
         email: editFormData.email,
         phone: editFormData.phone,
-        agentType: editFormData.agentType,
         isActive: editFormData.isActive,
       };
 
@@ -220,11 +219,19 @@ export default function AgentProfileDetail() {
         updateData.dob = editFormData.dob;
       }
 
-      await api.updateAgent(profile._id, updateData);
+      // Use appropriate API based on system type
+      if (isNewSystem) {
+        // New User system - don't send agentType, it's stored as role
+        await api.updateUserById(profile._id, updateData);
+      } else {
+        // Old Agent system
+        updateData.agentType = editFormData.agentType;
+        await api.updateAgent(profile._id, updateData);
+      }
 
       toast({
         title: 'Success',
-        description: 'Agent profile updated successfully',
+        description: 'Profile updated successfully',
       });
 
       setIsEditDialogOpen(false);

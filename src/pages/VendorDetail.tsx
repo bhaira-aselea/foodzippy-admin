@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Phone, Mail, Star, Calendar, MessageSquare, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
+import { Badge } from '@/components/ui/badge';
 import { api, normalizeVendor } from '@/lib/api';
 import MapPreview from '@/components/MapPreview';
 
@@ -418,6 +419,29 @@ export default function VendorDetail() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Dynamic Form Data Section */}
+          {vendor.formData && Object.keys(vendor.formData).length > 0 && (
+            <div className="bg-card rounded-xl border p-6">
+              <h2 className="text-lg font-semibold mb-4">Additional Form Data</h2>
+              <div className="grid grid-cols-2 gap-4">
+                {Object.entries(vendor.formData).map(([key, value]: [string, any]) => (
+                  <div key={key}>
+                    <p className="text-sm text-muted-foreground capitalize">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </p>
+                    <p className="font-medium">
+                      {Array.isArray(value) 
+                        ? value.join(', ') 
+                        : typeof value === 'boolean' 
+                        ? value ? 'Yes' : 'No'
+                        : value?.toString() || 'N/A'}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
