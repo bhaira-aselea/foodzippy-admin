@@ -307,8 +307,8 @@ export default function AgentProfileDetail() {
       </div>
 
       {/* Profile Card */}
-      <div className="bg-card rounded-xl border mb-8">
-        <div className="bg-gradient-to-r from-red-500 to-orange-500 h-32 rounded-t-xl"></div>
+      <div className="rounded-xl border mb-8 bg-[#E2333F]">
+        <div className="bg-gradient-to-r  h-32 rounded-t-xl"></div>
         
         <div className="px-8 pb-8">
           <div className="flex flex-col md:flex-row gap-6 -mt-16">

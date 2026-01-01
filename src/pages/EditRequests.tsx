@@ -30,10 +30,14 @@ interface EditRequest {
   city: string;
   state: string;
   mobileNumber: string;
-  agentId: {
+  createdById: {
     _id: string;
     name: string;
+    username: string;
+    email: string;
+    role: string;
   };
+  createdByName: string;
   editRequestDate: string;
   editRequested: boolean;
   editApproved: boolean;
@@ -60,7 +64,7 @@ export default function EditRequests() {
     try {
       setIsLoading(true);
       const response = await api.getPendingEditRequests();
-      setRequests(response.data || []);
+      setRequests(response.vendors || []);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -209,7 +213,7 @@ export default function EditRequests() {
             <div>
               <p className="text-sm text-muted-foreground">Unique Agents</p>
               <p className="text-3xl font-bold mt-2">
-                {new Set(requests.map(r => r.agentId._id)).size}
+                {new Set(requests.map(r => r.createdById?._id).filter(Boolean)).size}
               </p>
             </div>
             <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
@@ -278,7 +282,7 @@ export default function EditRequests() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-muted-foreground" />
-                      {request.agentId.name}
+                      {request.createdById?.name || request.createdByName || 'N/A'}
                     </div>
                   </TableCell>
                   <TableCell>{getStatusBadge(request.restaurantStatus)}</TableCell>
@@ -332,7 +336,7 @@ export default function EditRequests() {
             <DialogTitle>Approve Edit Request</DialogTitle>
             <DialogDescription>
               Grant edit permission for <strong>{selectedRequest?.restaurantName}</strong> to agent{' '}
-              <strong>{selectedRequest?.agentId.name}</strong>
+              <strong>{selectedRequest?.createdById?.name || selectedRequest?.createdByName || 'N/A'}</strong>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -369,7 +373,7 @@ export default function EditRequests() {
             <DialogTitle>Reject Edit Request</DialogTitle>
             <DialogDescription>
               Deny edit permission for <strong>{selectedRequest?.restaurantName}</strong> to agent{' '}
-              <strong>{selectedRequest?.agentId.name}</strong>
+              <strong>{selectedRequest?.createdById?.name || selectedRequest?.createdByName || 'N/A'}</strong>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

@@ -344,7 +344,7 @@ class ApiClient {
   async getPendingEditRequests() {
     return this.request<{
       success: boolean;
-      data: any[];
+      vendors: any[];
       count: number;
     }>('/api/admin/edit-requests/pending');
   }

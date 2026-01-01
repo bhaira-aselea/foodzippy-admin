@@ -549,7 +549,7 @@ export default function Agents() {
               </Label>
               <Input
                 id="create-name"
-                placeholder="Enter agent name"
+                placeholder="eg: Mohit Sharma"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
@@ -560,7 +560,7 @@ export default function Agents() {
               </Label>
               <Input
                 id="create-username"
-                placeholder="Enter username"
+                placeholder="eg: mohit123"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               />
