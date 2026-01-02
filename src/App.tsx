@@ -12,6 +12,7 @@ import VendorRequests from "./pages/VendorRequests";
 import AllVendors from "./pages/AllVendors";
 import VendorDetail from "./pages/VendorDetail";
 import VendorEdit from "./pages/VendorEdit";
+import VendorTypes from "./pages/VendorTypes";
 import VendorFormBuilder from "./pages/VendorFormBuilder";
 import Agents from "./pages/Agents";
 import AgentAttendance from "./pages/AgentAttendance";
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/vendors" element={<AllVendors />} />
               <Route path="/vendor/:id" element={<VendorDetail />} />
               <Route path="/vendor/:id/edit" element={<VendorEdit />} />
+              <Route path="/vendor-types" element={<VendorTypes />} />
               <Route path="/vendor-form-builder" element={<VendorFormBuilder />} />
               <Route path="/agents" element={<Agents />} />
               <Route path="/agent-attendance" element={<AgentAttendance />} />

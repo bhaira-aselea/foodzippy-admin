@@ -124,7 +124,7 @@ export default function VendorRequests() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Restaurant Name</TableHead>
+              <TableHead>Vendor Name</TableHead>
               <TableHead>City</TableHead>
               <TableHead>Mobile Number</TableHead>
               <TableHead>Agent</TableHead>

@@ -66,7 +66,7 @@ export default function AllVendors() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Restaurant</TableHead>
+              <TableHead>Vendor</TableHead>
               <TableHead>City</TableHead>
               <TableHead>Rating</TableHead>
               <TableHead>Follow-Up Date</TableHead>

@@ -728,7 +728,7 @@ export default function Agents() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Restaurant Name</TableHead>
+                      <TableHead>Vendor Name</TableHead>
                       <TableHead>City</TableHead>
                       <TableHead>Mobile</TableHead>
                       <TableHead>Date Approved</TableHead>
@@ -803,7 +803,7 @@ export default function Agents() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Restaurant Name</TableHead>
+                      <TableHead>Vendor Name</TableHead>
                       <TableHead>City</TableHead>
                       <TableHead>Mobile</TableHead>
                       <TableHead>Status</TableHead>
@@ -882,7 +882,7 @@ export default function Agents() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Restaurant Name</TableHead>
+                      <TableHead>Vendor Name</TableHead>
                       <TableHead>City</TableHead>
                       <TableHead>Follow-Up Date</TableHead>
                       <TableHead>Convincing Status</TableHead>

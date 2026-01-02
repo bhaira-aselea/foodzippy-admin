@@ -58,6 +58,8 @@ export default function EditRequests() {
 
   useEffect(() => {
     loadRequests();
+    // Mark edit requests as seen when page loads
+    api.markEditRequestsAsSeen().catch(console.error);
   }, []);
 
   const loadRequests = async () => {
@@ -245,7 +247,7 @@ export default function EditRequests() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Restaurant Name</TableHead>
+              <TableHead>Vendor Name</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Mobile</TableHead>
               <TableHead>Agent</TableHead>

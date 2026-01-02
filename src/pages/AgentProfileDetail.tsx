@@ -331,8 +331,8 @@ export default function AgentProfileDetail() {
             <div className="flex-1 pt-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-3xl font-bold">{profile.name}</h2>
-                  <p className="text-muted-foreground mt-1">@{profile.username}</p>
+                  <h2 className="text-3xl font-bold text-black">{profile.name}</h2>
+                  <p className="text-black/60 mt-1">@{profile.username}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Badge className={profile.isActive ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}>
                       {profile.isActive ? 'Active' : 'Inactive'}
@@ -351,32 +351,32 @@ export default function AgentProfileDetail() {
           {/* Contact Details Grid */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{profile.email || 'Not provided'}</p>
+                <p className="text-sm text-black/60">Email</p>
+                <p className="font-medium text-black">{profile.email || 'Not provided'}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Phone className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Phone className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="font-medium">{profile.phone || 'Not provided'}</p>
+                <p className="text-sm text-black/60">Phone</p>
+                <p className="font-medium text-black">{profile.phone || 'Not provided'}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Date of Birth</p>
-                <p className="font-medium">
+                <p className="text-sm text-black/60">Date of Birth</p>
+                <p className="font-medium text-black">
                   {profile.dob 
                     ? new Date(profile.dob).toLocaleDateString('en-US', {
                         day: '2-digit',
@@ -389,22 +389,22 @@ export default function AgentProfileDetail() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <User className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Age</p>
-                <p className="font-medium">{profile.age ? `${profile.age} years` : 'Not calculated'}</p>
+                <p className="text-sm text-black/60">Age</p>
+                <p className="font-medium text-black">{profile.age ? `${profile.age} years` : 'Not calculated'}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Briefcase className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Briefcase className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Agent Type</p>
-                <p className="font-medium">{profile.agentType}</p>
+                <p className="text-sm text-black/60">Agent Type</p>
+                <p className="font-medium text-black">{profile.agentType}</p>
               </div>
             </div>
           </div>
@@ -438,7 +438,7 @@ export default function AgentProfileDetail() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Restaurant Name</TableHead>
+                    <TableHead>Vendor Name</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead>Status</TableHead>

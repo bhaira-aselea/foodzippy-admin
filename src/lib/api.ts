@@ -349,6 +349,23 @@ class ApiClient {
     }>('/api/admin/edit-requests/pending');
   }
 
+  async getUnreadEditRequestsCount() {
+    return this.request<{
+      success: boolean;
+      count: number;
+    }>('/api/admin/edit-requests/unread-count');
+  }
+
+  async markEditRequestsAsSeen() {
+    return this.request<{
+      success: boolean;
+      message: string;
+      modifiedCount: number;
+    }>('/api/admin/edit-requests/mark-seen', {
+      method: 'PATCH',
+    });
+  }
+
   async approveVendorEdit(vendorId: string, remark?: string) {
     return this.request<{
       success: boolean;
@@ -372,12 +389,15 @@ class ApiClient {
   }
 
   // Form Configuration APIs
-  async getFormConfig(visibleTo?: string) {
-    const queryString = visibleTo ? `?visibleTo=${visibleTo}` : '';
+  async getFormConfig(visibleTo?: string, vendorType?: string) {
+    const queryParams = new URLSearchParams();
+    if (visibleTo) queryParams.append('visibleTo', visibleTo);
+    if (vendorType) queryParams.append('vendorType', vendorType);
+    const queryString = queryParams.toString();
     return this.request<{
       success: boolean;
       data: any[];
-    }>(`/api/form/config${queryString}`);
+    }>(`/api/form/config${queryString ? `?${queryString}` : ''}`);
   }
 
   async getAllSections() {
@@ -465,6 +485,84 @@ class ApiClient {
       body: JSON.stringify({ fields }),
     });
   }
+
+  // ==========================================
+  // Vendor Type APIs
+  // ==========================================
+  async getVendorTypes(activeOnly?: boolean) {
+    const queryString = activeOnly ? '?activeOnly=true' : '';
+    return this.request<{
+      success: boolean;
+      data: VendorType[];
+    }>(`/api/vendor-types${queryString}`);
+  }
+
+  async getVendorTypeById(id: string) {
+    return this.request<{
+      success: boolean;
+      data: VendorType;
+    }>(`/api/vendor-types/${id}`);
+  }
+
+  async createVendorType(data: {
+    name: string;
+    slug: string;
+    description?: string;
+    icon?: string;
+    order?: number;
+  }) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: VendorType;
+    }>('/api/vendor-types', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateVendorType(id: string, data: Partial<VendorType>) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: VendorType;
+    }>(`/api/vendor-types/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteVendorType(id: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>(`/api/vendor-types/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async reorderVendorTypes(orders: Array<{ id: string; order: number }>) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>('/api/vendor-types/reorder', {
+      method: 'POST',
+      body: JSON.stringify({ orders }),
+    });
+  }
+}
+
+// Vendor Type interface
+export interface VendorType {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const api = new ApiClient();

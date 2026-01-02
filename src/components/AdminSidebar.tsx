@@ -1,22 +1,56 @@
-import { LayoutDashboard, Users, ClipboardList, LogOut, UserCog, ClipboardCheck, FileEdit, Briefcase, Settings } from 'lucide-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { LayoutDashboard, Users, ClipboardList, LogOut, UserCog, ClipboardCheck, FileEdit, Briefcase, Settings, Store } from 'lucide-react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { api } from '@/lib/api';
 
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Vendor Requests', url: '/vendor-requests', icon: ClipboardList },
   { title: 'All Vendors', url: '/vendors', icon: Users },
+  { title: 'Vendor Types', url: '/vendor-types', icon: Store },
   { title: 'Vendor Form Builder', url: '/vendor-form-builder', icon: Settings },
   { title: 'Agents', url: '/agents', icon: UserCog },
   { title: 'Agent Attendance', url: '/agent-attendance', icon: ClipboardCheck },
   { title: 'Employee Attendance', url: '/employee-attendance', icon: Briefcase },
-  { title: 'Edit Requests', url: '/edit-requests', icon: FileEdit },
+  { title: 'Edit Requests', url: '/edit-requests', icon: FileEdit, showBadge: true },
 ];
 
 export function AdminSidebar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [unreadEditRequestsCount, setUnreadEditRequestsCount] = useState(0);
+
+  // Fetch unread edit requests count
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await api.getUnreadEditRequestsCount();
+      if (response.success) {
+        setUnreadEditRequestsCount(response.count);
+      }
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    
+    // Poll for updates every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Mark as seen when navigating to edit requests page
+  useEffect(() => {
+    if (location.pathname === '/edit-requests' && unreadEditRequestsCount > 0) {
+      api.markEditRequestsAsSeen().then(() => {
+        setUnreadEditRequestsCount(0);
+      }).catch(console.error);
+    }
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();

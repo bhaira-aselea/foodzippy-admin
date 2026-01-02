@@ -26,6 +26,14 @@ export default function VendorEdit() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to get vendor type name with proper capitalization
+  const getVendorTypeName = () => {
+    if (!vendor?.vendorType) return 'Restaurant';
+    return vendor.vendorType.charAt(0).toUpperCase() + vendor.vendorType.slice(1);
+  };
+
+  const vendorTypeName = vendor ? getVendorTypeName() : 'Restaurant';
+
   useEffect(() => {
     if (id) {
       loadVendor();
@@ -167,12 +175,12 @@ export default function VendorEdit() {
       </div>
 
       <div className="space-y-6">
-        {/* Restaurant Information */}
+        {/* Vendor Information */}
         <div className="bg-card rounded-xl border p-6">
-          <h2 className="text-lg font-semibold mb-4">Restaurant Information</h2>
+          <h2 className="text-lg font-semibold mb-4">{vendorTypeName} Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="restaurantName">restaurantName</Label>
+              <Label htmlFor="restaurantName">{vendorTypeName} Name</Label>
               <Input
                 id="restaurantName"
                 value={vendor.restaurantName}
@@ -180,7 +188,7 @@ export default function VendorEdit() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="restaurantImage">restaurantImage</Label>
+              <Label htmlFor="restaurantImage">{vendorTypeName} Image</Label>
               <Input
                 id="restaurantImage"
                 value={vendor.restaurantImage}
@@ -188,7 +196,7 @@ export default function VendorEdit() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="restaurantStatus">restaurantStatus</Label>
+              <Label htmlFor="restaurantStatus">{vendorTypeName} Status</Label>
               <Select
                 value={vendor.restaurantStatus}
                 onValueChange={(value) => updateField('restaurantStatus', value)}

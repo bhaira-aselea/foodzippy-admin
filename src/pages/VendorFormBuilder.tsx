@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Eye, Edit, Trash2, GripVertical, AlertCircle } from 'lucide-react';
-import { api } from '@/lib/api';
+import { Plus, Eye, Edit, Trash2, GripVertical, AlertCircle, Store } from 'lucide-react';
+import { api, VendorType } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { FieldFormModal } from '@/components/FieldFormModal';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +41,8 @@ interface FormField {
   isActive: boolean;
   isSystemField: boolean;
   helpText?: string;
+  vendorTypes?: string[];
+  labelTemplate?: string;
 }
 
 interface FormSection {
@@ -46,10 +55,14 @@ interface FormSection {
   isActive: boolean;
   visibleTo: string[];
   fields: FormField[];
+  vendorTypes?: string[];
+  labelTemplate?: string;
 }
 
 export default function VendorFormBuilder() {
   const [formConfig, setFormConfig] = useState<FormSection[]>([]);
+  const [vendorTypes, setVendorTypes] = useState<VendorType[]>([]);
+  const [selectedVendorType, setSelectedVendorType] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedField, setSelectedField] = useState<FormField | null>(null);
@@ -60,14 +73,36 @@ export default function VendorFormBuilder() {
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
-    loadFormConfig();
+    loadVendorTypes();
   }, []);
+
+  useEffect(() => {
+    if (selectedVendorType) {
+      loadFormConfig();
+    }
+  }, [selectedVendorType]);
+
+  const loadVendorTypes = async () => {
+    try {
+      const response = await api.getVendorTypes(true);
+      if (response.success && response.data) {
+        setVendorTypes(response.data);
+        // Set first vendor type as default
+        if (response.data.length > 0) {
+          setSelectedVendorType(response.data[0].slug);
+        }
+      }
+    } catch (err: any) {
+      console.error('Failed to load vendor types:', err);
+      toast.error('Failed to load vendor types');
+    }
+  };
 
   const loadFormConfig = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.getFormConfig();
+      const response = await api.getFormConfig(undefined, selectedVendorType);
       console.log('Form config response:', response);
       if (response.success && response.data) {
         setFormConfig(response.data);
@@ -160,7 +195,9 @@ export default function VendorFormBuilder() {
   const step1Sections = formConfig.filter((s) => s.stepNumber === 1);
   const step2Sections = formConfig.filter((s) => s.stepNumber === 2);
 
-  if (loading) {
+  const selectedTypeName = vendorTypes.find(t => t.slug === selectedVendorType)?.name || 'Vendor';
+
+  if (loading && vendorTypes.length === 0) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="text-center">
@@ -237,12 +274,40 @@ export default function VendorFormBuilder() {
         </div>
       </div>
 
+      {/* Vendor Type Selector */}
+      <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Store className="w-5 h-5 text-orange-600" />
+              <span className="font-medium text-gray-700">Select Vendor Type:</span>
+            </div>
+            <Select value={selectedVendorType} onValueChange={setSelectedVendorType}>
+              <SelectTrigger className="w-[200px] bg-white">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {vendorTypes.map((type) => (
+                  <SelectItem key={type._id} value={type.slug}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-gray-600 flex-1">
+              Preview and edit form fields as they appear for <strong className="text-orange-600">{selectedTypeName}</strong> type.
+              Labels like "Restaurant Name" will show as "{selectedTypeName} Name".
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Info Alert */}
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           Changes made here will affect the vendor registration form for agents and employees.
-          System fields (Restaurant Name, Image, Address, Location) cannot be deleted.
+          System fields ({selectedTypeName} Name, Image, Address, Location) cannot be deleted.
           <div className="mt-2 text-xs">
             <strong>Total Sections:</strong> {formConfig.length} | 
             <strong> Step 1:</strong> {step1Sections.length} sections | 
@@ -251,10 +316,15 @@ export default function VendorFormBuilder() {
         </AlertDescription>
       </Alert>
 
-      {/* Tabs for Steps */}
+      {loading ? (
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+      /* Tabs for Steps */
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="step-1">Step 1: Restaurant Details</TabsTrigger>
+          <TabsTrigger value="step-1">Step 1: {selectedTypeName} Details</TabsTrigger>
           <TabsTrigger value="step-2">Step 2: Review & Follow-up</TabsTrigger>
         </TabsList>
 
@@ -450,6 +520,7 @@ export default function VendorFormBuilder() {
           ))}
         </TabsContent>
       </Tabs>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -493,7 +564,7 @@ export default function VendorFormBuilder() {
           </AlertDialogHeader>
           
           <div className="space-y-6 py-4">
-            <div className="text-sm font-semibold text-primary">STEP 1: RESTAURANT DETAILS</div>
+            <div className="text-sm font-semibold text-primary">STEP 1: {selectedTypeName.toUpperCase()} DETAILS</div>
             {step1Sections.map((section) => (
               <div key={section._id} className="space-y-3">
                 <div className="border-l-4 border-primary pl-3">

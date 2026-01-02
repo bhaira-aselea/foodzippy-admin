@@ -32,6 +32,14 @@ export default function VendorDetail() {
     }
   };
 
+  // Get vendor type name (capitalize first letter)
+  const getVendorTypeName = () => {
+    if (!vendor?.vendorType) return 'Restaurant';
+    return vendor.vendorType.charAt(0).toUpperCase() + vendor.vendorType.slice(1);
+  };
+
+  const vendorTypeName = vendor ? getVendorTypeName() : 'Restaurant';
+
   if (isLoading) {
     return (
       <div className="p-6 lg:p-8">
@@ -74,9 +82,9 @@ export default function VendorDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Info */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Restaurant Information */}
+          {/* Vendor Information */}
           <div className="bg-card rounded-xl border p-6">
-            <h2 className="text-lg font-semibold mb-4">Restaurant Information</h2>
+            <h2 className="text-lg font-semibold mb-4">{vendorTypeName} Information</h2>
             <div className="flex gap-6">
               <img
                 src={vendor.restaurantImage}
@@ -85,7 +93,7 @@ export default function VendorDetail() {
               />
               <div className="flex-1 grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Restaurant Name</p>
+                  <p className="text-sm text-muted-foreground">{vendorTypeName} Name</p>
                   <p className="font-medium">{vendor.restaurantName}</p>
                 </div>
                 <div>
