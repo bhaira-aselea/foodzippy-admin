@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Vendor Requests', url: '/vendor-requests', icon: ClipboardList },
+  { title: 'Vendors Request', url: '/vendor-requests', icon: ClipboardList },
   { title: 'All Vendors', url: '/vendors', icon: Users },
   { title: 'Vendor Types', url: '/vendor-types', icon: Store },
   { title: 'Vendor Form Builder', url: '/vendor-form-builder', icon: Settings },
@@ -58,7 +58,7 @@ export function AdminSidebar() {
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-sidebar flex flex-col border-r border-sidebar-border">
+    <aside className="w-64 min-h-screen bg-[#FF263A] text-white flex flex-col border-r border-[#FF263A]">
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex flex-col items-center gap-2">
@@ -78,17 +78,23 @@ export function AdminSidebar() {
             <li key={item.title}>
               <NavLink
                 to={item.url}
+                style={({ isActive }) => 
+                  isActive ? { backgroundColor: '#FF263A', color: 'white' } : {}
+                }
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                      : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    !isActive && 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                   )
                 }
               >
                 <item.icon className="w-5 h-5" />
                 {item.title}
+                {item.showBadge && unreadEditRequestsCount > 0 && (
+                  <span className="ml-auto bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[20px] text-center">
+                    {unreadEditRequestsCount}
+                  </span>
+                )}
               </NavLink>
             </li>
           ))}
