@@ -30,9 +30,13 @@ class ApiClient {
     const token = this.getAuthToken();
     
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
       ...options.headers,
     };
+
+    // Only set Content-Type if body is not FormData
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -165,7 +169,31 @@ class ApiClient {
     });
   }
 
-  async updateUserById(id: string, data: any) {
+  async updateUserById(id: string, data: any, profileImage?: File) {
+    // If profile image is provided, use FormData
+    if (profileImage) {
+      const formData = new FormData();
+      formData.append('profileImage', profileImage);
+      
+      // Append other data fields
+      Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+          formData.append(key, data[key].toString());
+        }
+      });
+
+      return this.request<{
+        success: boolean;
+        user: any;
+        message: string;
+      }>(`/api/admin/users/${id}`, {
+        method: 'PUT',
+        body: formData,
+        headers: {}, // Let browser set Content-Type with boundary
+      });
+    }
+
+    // Otherwise, use JSON
     return this.request<{
       success: boolean;
       user: any;

@@ -88,6 +88,8 @@ export default function AgentProfileDetail() {
     agentType: '',
     isActive: true,
   });
+  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>('');
 
   useEffect(() => {
     if (id) {
@@ -191,6 +193,18 @@ export default function AgentProfileDetail() {
     return `${hours}h ${mins}m`;
   };
 
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const openEditDialog = () => {
     if (profile) {
       setEditFormData({
@@ -200,6 +214,8 @@ export default function AgentProfileDetail() {
         agentType: profile.agentType || 'Field Agent',
         isActive: profile.isActive,
       });
+      setSelectedProfileImage(null);
+      setProfileImagePreview('');
       setIsEditDialogOpen(true);
     }
   };
@@ -222,7 +238,7 @@ export default function AgentProfileDetail() {
       // Use appropriate API based on system type
       if (isNewSystem) {
         // New User system - don't send agentType, it's stored as role
-        await api.updateUserById(profile._id, updateData);
+        await api.updateUserById(profile._id, updateData, selectedProfileImage || undefined);
       } else {
         // Old Agent system
         updateData.agentType = editFormData.agentType;
@@ -643,6 +659,25 @@ export default function AgentProfileDetail() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-profileImage">Profile Image</Label>
+              <div className="flex items-center gap-4">
+                {(profileImagePreview || profile?.profileImage) && (
+                  <img
+                    src={profileImagePreview || profile?.profileImage}
+                    alt="Profile preview"
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                )}
+                <Input
+                  id="edit-profileImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfileImageChange}
+                  className="flex-1"
+                />
+              </div>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="edit-email">Email</Label>
               <Input
