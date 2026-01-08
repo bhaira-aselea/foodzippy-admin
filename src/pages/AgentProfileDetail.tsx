@@ -26,6 +26,7 @@ interface AgentProfile {
   username: string;
   email: string;
   phone: string;
+  alternatePhone?: string;
   dob: string | null;
   age: number | null;
   agentType: string;
@@ -84,6 +85,7 @@ export default function AgentProfileDetail() {
   const [editFormData, setEditFormData] = useState({
     email: '',
     phone: '',
+    alternatePhone: '',
     dob: '',
     agentType: '',
     isActive: true,
@@ -210,6 +212,7 @@ export default function AgentProfileDetail() {
       setEditFormData({
         email: profile.email || '',
         phone: profile.phone || '',
+        alternatePhone: profile.alternatePhone || '',
         dob: profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : '',
         agentType: profile.agentType || 'Field Agent',
         isActive: profile.isActive,
@@ -228,6 +231,7 @@ export default function AgentProfileDetail() {
       const updateData: any = {
         email: editFormData.email,
         phone: editFormData.phone,
+        alternatePhone: editFormData.alternatePhone,
         isActive: editFormData.isActive,
       };
 
@@ -383,6 +387,16 @@ export default function AgentProfileDetail() {
               <div>
                 <p className="text-sm text-white">Phone</p>
                 <p className="font-medium text-white">{profile.phone || 'Not provided'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Phone className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-white">Alternate Phone</p>
+                <p className="font-medium text-white">{profile.alternatePhone || 'Not provided'}</p>
               </div>
             </div>
 
@@ -696,6 +710,16 @@ export default function AgentProfileDetail() {
                 placeholder="+1234567890"
                 value={editFormData.phone}
                 onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-alternatePhone">Alternate Phone</Label>
+              <Input
+                id="edit-alternatePhone"
+                type="tel"
+                placeholder="+0987654321 (Optional)"
+                value={editFormData.alternatePhone}
+                onChange={(e) => setEditFormData({ ...editFormData, alternatePhone: e.target.value })}
               />
             </div>
             <div className="space-y-2">
