@@ -1,29 +1,54 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Phone, Mail, Star, Calendar, MessageSquare, Smile } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, Mail, Star, Calendar, MessageSquare, Smile, IndianRupee, RefreshCw, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
-import { api, normalizeVendor } from '@/lib/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { api, normalizeVendor, PaymentConfig } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 import MapPreview from '@/components/MapPreview';
 
 export default function VendorDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [vendor, setVendor] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Payment states
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedVisitStatus, setSelectedVisitStatus] = useState<string>('');
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadVendor();
+      loadPaymentConfig();
     }
   }, [id]);
+
+  const loadPaymentConfig = async () => {
+    try {
+      const response = await api.getPaymentConfig();
+      if (response.success) {
+        setPaymentConfig(response.config);
+      }
+    } catch (error) {
+      console.error('Failed to load payment config:', error);
+    }
+  };
 
   const loadVendor = async () => {
     try {
       setIsLoading(true);
       const response = await api.getVendorById(id!);
-      setVendor(normalizeVendor(response.data));
+      const normalizedVendor = normalizeVendor(response.data);
+      setVendor(normalizedVendor);
+      setSelectedCategory(normalizedVendor.paymentCategory || '');
+      setSelectedVisitStatus(normalizedVendor.visitStatus || 'pending-visit');
     } catch (error) {
       console.error('Failed to load vendor:', error);
       setVendor(null);
@@ -31,6 +56,84 @@ export default function VendorDetail() {
       setIsLoading(false);
     }
   };
+
+  const handlePaymentStatusUpdate = async () => {
+    if (!selectedCategory || !selectedVisitStatus) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please select both category and visit status',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setIsUpdatingPayment(true);
+      const response = await api.updateVendorPaymentStatus(id!, {
+        paymentCategory: selectedCategory,
+        visitStatus: selectedVisitStatus,
+      });
+      if (response.success) {
+        toast({
+          title: 'Success',
+          description: response.paymentCreated 
+            ? `Payment of ₹${response.paymentAmount} created for ${response.paymentType}`
+            : 'Payment status updated',
+        });
+        // Update vendor state with returned data to show updated values immediately
+        if (response.vendor) {
+          setVendor((prev: any) => ({
+            ...prev,
+            paymentCategory: response.vendor.paymentCategory,
+            visitStatus: response.vendor.visitStatus,
+            followUpDate: response.vendor.followUpDate,
+            totalPaymentDue: response.vendor.totalPaymentDue,
+            totalPaymentPaid: response.vendor.totalPaymentPaid,
+            paymentCompleted: response.vendor.paymentCompleted,
+          }));
+        } else {
+          loadVendor(); // Fallback to reload
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update payment status',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdatingPayment(false);
+    }
+  };
+
+  // Calculate estimated payment based on selected options
+  const getEstimatedPayment = () => {
+    if (!paymentConfig || !paymentConfig.categories || !selectedCategory || !selectedVisitStatus) return null;
+    
+    const category = selectedCategory as 'A' | 'B' | 'C' | 'D';
+    if (!['A', 'B', 'C', 'D'].includes(category)) return null;
+    
+    const rates = paymentConfig.categories[category];
+    if (!rates) return null;
+
+    const isOnboarded = selectedVisitStatus.includes('onboarded');
+    
+    if (isOnboarded) {
+      return { type: 'Onboarding', amount: rates.onboarding };
+    }
+    
+    if (selectedVisitStatus === 'visited-followup-scheduled') {
+      return { type: 'Visit', amount: rates.visit };
+    }
+    
+    if (selectedVisitStatus === 'followup-2nd-scheduled') {
+      return { type: 'Follow-up', amount: rates.followup };
+    }
+    
+    return null;
+  };
+
+  const estimatedPayment = paymentConfig ? getEstimatedPayment() : null;
 
   // Get vendor type name (capitalize first letter)
   const getVendorTypeName = () => {
@@ -351,6 +454,255 @@ export default function VendorDetail() {
               </p>
             </div>
           </div>
+
+          {/* Payment & Category Section */}
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-700">
+                <IndianRupee className="w-5 h-5" />
+                Payment Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Payment Category */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Payment Category
+                </label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A">Category A (₹70/₹70/₹700)</SelectItem>
+                    <SelectItem value="B">Category B (₹50/₹50/₹500)</SelectItem>
+                    <SelectItem value="C">Category C (₹35/₹35/₹350)</SelectItem>
+                    <SelectItem value="D">Category D (₹20/₹20/₹200)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Step-based Visit Status */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Current Stage
+                </label>
+                <Select 
+                  value={
+                    selectedVisitStatus === 'pending-visit' ? 'pending' :
+                    selectedVisitStatus.startsWith('visited') ? 'visited' :
+                    selectedVisitStatus.startsWith('followup') ? 'followup' :
+                    selectedVisitStatus.startsWith('2nd') ? '2nd-followup' : 'pending'
+                  } 
+                  onValueChange={(stage) => {
+                    // Set default status for each stage
+                    if (stage === 'pending') setSelectedVisitStatus('pending-visit');
+                    else if (stage === 'visited') setSelectedVisitStatus('visited-onboarded');
+                    else if (stage === 'followup') setSelectedVisitStatus('followup-onboarded');
+                    else if (stage === '2nd-followup') setSelectedVisitStatus('2nd-followup-onboarded');
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">🕐 Pending Visit</SelectItem>
+                    <SelectItem value="visited">📍 Visited</SelectItem>
+                    <SelectItem value="followup">🔄 Follow-up Done</SelectItem>
+                    <SelectItem value="2nd-followup">🔄 2nd Follow-up Done</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Visited Options */}
+              {selectedVisitStatus.startsWith('visited') && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Visit Outcome
+                  </label>
+                  <div className="grid grid-cols-1 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVisitStatus('visited-onboarded')}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        selectedVisitStatus === 'visited-onboarded' 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="font-medium">✓ Onboarded</span>
+                      <p className="text-xs text-muted-foreground">Vendor successfully onboarded</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVisitStatus('visited-rejected')}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        selectedVisitStatus === 'visited-rejected' 
+                          ? 'border-red-500 bg-red-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="font-medium">✗ Rejected</span>
+                      <p className="text-xs text-muted-foreground">Vendor declined</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVisitStatus('visited-followup-scheduled')}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        selectedVisitStatus === 'visited-followup-scheduled' 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="font-medium">📅 Follow-up Scheduled</span>
+                      <p className="text-xs text-muted-foreground">Agent will visit again (Visit payment credited)</p>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Follow-up Options */}
+              {selectedVisitStatus.startsWith('followup') && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Follow-up Outcome
+                  </label>
+                  <div className="grid grid-cols-1 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVisitStatus('followup-onboarded')}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        selectedVisitStatus === 'followup-onboarded' 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="font-medium">✓ Onboarded</span>
+                      <p className="text-xs text-muted-foreground">Vendor successfully onboarded after follow-up</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVisitStatus('followup-rejected')}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        selectedVisitStatus === 'followup-rejected' 
+                          ? 'border-red-500 bg-red-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="font-medium">✗ Rejected</span>
+                      <p className="text-xs text-muted-foreground">Vendor declined after follow-up</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVisitStatus('followup-2nd-scheduled')}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        selectedVisitStatus === 'followup-2nd-scheduled' 
+                          ? 'border-orange-500 bg-orange-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="font-medium">📅 2nd Follow-up Scheduled</span>
+                      <p className="text-xs text-muted-foreground">Visit + Follow-up payment credited</p>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 2nd Follow-up Options */}
+              {selectedVisitStatus.startsWith('2nd') && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    2nd Follow-up Outcome
+                  </label>
+                  <div className="grid grid-cols-1 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVisitStatus('2nd-followup-onboarded')}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        selectedVisitStatus === '2nd-followup-onboarded' 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="font-medium">✓ Onboarded</span>
+                      <p className="text-xs text-muted-foreground">Vendor successfully onboarded</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVisitStatus('2nd-followup-rejected')}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        selectedVisitStatus === '2nd-followup-rejected' 
+                          ? 'border-red-500 bg-red-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="font-medium">✗ Rejected</span>
+                      <p className="text-xs text-muted-foreground">Vendor declined after 2nd follow-up</p>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Current Status Display */}
+              {vendor.paymentCategory && (
+                <div className="bg-white rounded-lg p-3 border border-green-200">
+                  <p className="text-xs text-muted-foreground">Current Category</p>
+                  <Badge className="mt-1 bg-green-100 text-green-800">
+                    Category {vendor.paymentCategory}
+                  </Badge>
+                  {vendor.visitStatus && (
+                    <>
+                      <p className="text-xs text-muted-foreground mt-2">Current Status</p>
+                      <Badge variant="outline" className="mt-1">
+                        {vendor.visitStatus.replace(/-/g, ' ')}
+                      </Badge>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Estimated Payment */}
+              {estimatedPayment && (
+                <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                  <p className="text-xs text-muted-foreground">Estimated Payment for this action</p>
+                  <p className="text-lg font-bold text-yellow-700">
+                    ₹{estimatedPayment.amount} ({estimatedPayment.type})
+                  </p>
+                </div>
+              )}
+
+              {/* Payment Due/Paid - Always show */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-yellow-50 rounded-lg p-2 border border-yellow-200 text-center">
+                  <p className="text-xs text-muted-foreground">Due</p>
+                  <p className="font-bold text-yellow-700">₹{vendor.totalPaymentDue || 0}</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-2 border border-green-200 text-center">
+                  <p className="text-xs text-muted-foreground">Paid</p>
+                  <p className="font-bold text-green-700">₹{vendor.totalPaymentPaid || 0}</p>
+                </div>
+              </div>
+
+              {/* Update Button */}
+              <Button 
+                className="w-full" 
+                onClick={handlePaymentStatusUpdate}
+                disabled={isUpdatingPayment || !selectedCategory}
+              >
+                {isUpdatingPayment ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Update Payment Status
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* Review Section */}
           {vendor.review && (

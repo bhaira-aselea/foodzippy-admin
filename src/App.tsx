@@ -18,7 +18,10 @@ import Agents from "./pages/Agents";
 import AgentAttendance from "./pages/AgentAttendance";
 import EmployeeAttendance from "./pages/EmployeeAttendance";
 import AgentProfileDetail from "./pages/AgentProfileDetail";
+import AgentPaymentDetails from "./pages/AgentPaymentDetails";
 import EditRequests from "./pages/EditRequests";
+import PaymentSettings from "./pages/PaymentSettings";
+import PaymentManagement from "./pages/PaymentManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,7 +50,10 @@ const App = () => (
               <Route path="/agent-attendance" element={<AgentAttendance />} />
               <Route path="/employee-attendance" element={<EmployeeAttendance />} />
               <Route path="/agent-profile/:id" element={<AgentProfileDetail />} />
+              <Route path="/agent-payments/:agentId" element={<AgentPaymentDetails />} />
               <Route path="/edit-requests" element={<EditRequests />} />
+              <Route path="/payment-settings" element={<PaymentSettings />} />
+              <Route path="/payments" element={<PaymentManagement />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

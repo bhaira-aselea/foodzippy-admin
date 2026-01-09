@@ -394,6 +394,23 @@ class ApiClient {
     });
   }
 
+  async getUnreadVendorRequestsCount() {
+    return this.request<{
+      success: boolean;
+      count: number;
+    }>('/api/admin/vendors/unread-count');
+  }
+
+  async markVendorRequestsAsSeen() {
+    return this.request<{
+      success: boolean;
+      message: string;
+      modifiedCount: number;
+    }>('/api/admin/vendors/mark-seen', {
+      method: 'PATCH',
+    });
+  }
+
   async approveVendorEdit(vendorId: string, remark?: string) {
     return this.request<{
       success: boolean;
@@ -578,6 +595,229 @@ class ApiClient {
       body: JSON.stringify({ orders }),
     });
   }
+
+  // ==========================================
+  // PAYMENT APIs
+  // ==========================================
+
+  // Get payment configuration
+  async getPaymentConfig() {
+    return this.request<{
+      success: boolean;
+      config: PaymentConfig;
+    }>('/api/payments/admin/payment-config');
+  }
+
+  // Update payment configuration
+  async updatePaymentConfig(data: Partial<PaymentConfig>) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      config: PaymentConfig;
+    }>('/api/payments/admin/payment-config', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Update vendor payment status
+  async updateVendorPaymentStatus(vendorId: string, data: {
+    paymentCategory?: string;
+    visitStatus?: string;
+    followUpDate?: string;
+    secondFollowUpDate?: string;
+    remarks?: string;
+  }) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      vendor: any;
+      newPayment: any;
+      paymentCreated?: boolean;
+      paymentAmount?: number;
+      paymentType?: string;
+    }>(`/api/payments/admin/vendors/${vendorId}/payment-status`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Get all payments
+  async getPayments(params?: {
+    status?: string;
+    agentId?: string;
+    category?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      success: boolean;
+      payments: Payment[];
+      stats: {
+        pending: number;
+        paid: number;
+        pendingCount: number;
+        paidCount: number;
+      };
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+      };
+    }>(`/api/payments/admin/payments${queryString ? `?${queryString}` : ''}`);
+  }
+
+  // Get payments grouped by agent
+  async getPaymentsByAgent(params?: {
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      success: boolean;
+      agents: AgentPaymentSummary[];
+    }>(`/api/payments/admin/payments/by-agent${queryString ? `?${queryString}` : ''}`);
+  }
+
+  // Get single agent payment details
+  async getAgentPaymentDetails(agentId: string) {
+    return this.request<{
+      success: boolean;
+      agent: {
+        _id: string;
+        name: string;
+        email: string;
+        phone: string;
+        profileImage?: string;
+        isActive: boolean;
+        agentType?: string;
+      };
+      payments: Payment[];
+      stats: {
+        total: number;
+        pending: number;
+        paid: number;
+        totalVendors: number;
+        paymentCounts: {
+          visit: number;
+          followup: number;
+          onboarding: number;
+          balance: number;
+        };
+        vendorCounts: {
+          visited: number;
+          onboarded: number;
+          rejected: number;
+          followup: number;
+        };
+      };
+      paymentConfig: PaymentConfig;
+    }>(`/api/payments/admin/payments/agent/${agentId}`);
+  }
+
+  // Mark payments as paid
+  async markPaymentsAsPaid(data: { paymentIds?: string[]; agentId?: string }) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      modifiedCount: number;
+    }>('/api/payments/admin/payments/mark-paid', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Update payment record
+  async updatePayment(paymentId: string, data: {
+    category?: string;
+    paymentType?: string;
+    amount?: number;
+    paymentStatus?: string;
+  }) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      payment: Payment;
+    }>(`/api/payments/admin/payments/${paymentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Delete payment record
+  async deletePayment(paymentId: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>(`/api/payments/admin/payments/${paymentId}`, {
+      method: 'DELETE',
+    });
+  }
+}
+
+// Payment interfaces
+export interface PaymentConfig {
+  _id?: string;
+  categories: {
+    A: { visit: number; followup: number; onboarding: number };
+    B: { visit: number; followup: number; onboarding: number };
+    C: { visit: number; followup: number; onboarding: number };
+    D: { visit: number; followup: number; onboarding: number };
+  };
+  // Legacy flat format
+  categoryA?: { visit: number; followup: number; onboarding: number };
+  categoryB?: { visit: number; followup: number; onboarding: number };
+  categoryC?: { visit: number; followup: number; onboarding: number };
+  categoryD?: { visit: number; followup: number; onboarding: number };
+  updatedBy?: string;
+  updatedAt?: string;
+}
+
+export interface Payment {
+  _id: string;
+  agentId: string;
+  agentName: string;
+  vendorId: string;
+  vendorName: string;
+  category: string;
+  paymentType: string;
+  amount: number;
+  visitStatus: string;
+  paymentStatus: string;
+  paidDate?: string;
+  paidBy?: string;
+  remarks?: string;
+  createdAt: string;
+}
+
+export interface AgentPaymentSummary {
+  _id: string;
+  agentName: string;
+  totalAmount: number;
+  vendorCount: number;
+  pendingAmount: number;
+  paidAmount: number;
 }
 
 // Vendor Type interface

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, ClipboardList, LogOut, UserCog, ClipboardCheck, FileEdit, Briefcase, Settings, Store } from 'lucide-react';
+import { LayoutDashboard, Users, ClipboardList, LogOut, UserCog, ClipboardCheck, FileEdit, Briefcase, Settings, Store, IndianRupee, Wallet } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -7,13 +7,15 @@ import { api } from '@/lib/api';
 
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Vendors Request', url: '/vendor-requests', icon: ClipboardList },
+  { title: 'Vendors Request', url: '/vendor-requests', icon: ClipboardList, showBadge: true },
   { title: 'All Vendors', url: '/vendors', icon: Users },
   { title: 'Vendor Types', url: '/vendor-types', icon: Store },
   { title: 'Vendor Form Builder', url: '/vendor-form-builder', icon: Settings },
   { title: 'Agents', url: '/agents', icon: UserCog },
   { title: 'Agent Attendance', url: '/agent-attendance', icon: ClipboardCheck },
   { title: 'Employee Attendance', url: '/employee-attendance', icon: Briefcase },
+  { title: 'Payments', url: '/payments', icon: Wallet },
+  { title: 'Payment Settings', url: '/payment-settings', icon: IndianRupee },
   { title: 'Edit Requests', url: '/edit-requests', icon: FileEdit, showBadge: true },
 ];
 
@@ -22,6 +24,7 @@ export function AdminSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [unreadEditRequestsCount, setUnreadEditRequestsCount] = useState(0);
+  const [unreadVendorRequestsCount, setUnreadVendorRequestsCount] = useState(0);
 
   // Fetch unread edit requests count
   const fetchUnreadCount = async () => {
@@ -35,11 +38,27 @@ export function AdminSidebar() {
     }
   };
 
+  // Fetch unread vendor requests count
+  const fetchUnreadVendorRequestsCount = async () => {
+    try {
+      const response = await api.getUnreadVendorRequestsCount();
+      if (response.success) {
+        setUnreadVendorRequestsCount(response.count);
+      }
+    } catch (error) {
+      console.error('Failed to fetch unread vendor requests count:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUnreadCount();
+    fetchUnreadVendorRequestsCount();
     
     // Poll for updates every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000);
+    const interval = setInterval(() => {
+      fetchUnreadCount();
+      fetchUnreadVendorRequestsCount();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -50,7 +69,14 @@ export function AdminSidebar() {
         setUnreadEditRequestsCount(0);
       }).catch(console.error);
     }
-  }, [location.pathname]);
+    
+    // Mark vendor requests as seen when navigating to vendor requests page
+    if (location.pathname === '/vendor-requests' && unreadVendorRequestsCount > 0) {
+      api.markVendorRequestsAsSeen().then(() => {
+        setUnreadVendorRequestsCount(0);
+      }).catch(console.error);
+    }
+  }, [location.pathname, unreadEditRequestsCount, unreadVendorRequestsCount]);
 
   const handleLogout = () => {
     logout();
@@ -79,20 +105,25 @@ export function AdminSidebar() {
               <NavLink
                 to={item.url}
                 style={({ isActive }) => 
-                  isActive ? { backgroundColor: '#FF263A', color: 'white' } : {}
+                  isActive ? { backgroundColor: 'white', color: '#1f2937' } : {}
                 }
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                    !isActive && 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-white',
+                    !isActive && 'hover:bg-white hover:text-gray-900'
                   )
                 }
               >
                 <item.icon className="w-5 h-5" />
                 {item.title}
-                {item.showBadge && unreadEditRequestsCount > 0 && (
+                {item.showBadge && item.title === 'Edit Requests' && unreadEditRequestsCount > 0 && (
                   <span className="ml-auto bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[20px] text-center">
                     {unreadEditRequestsCount}
+                  </span>
+                )}
+                {item.showBadge && item.title === 'Vendors Request' && unreadVendorRequestsCount > 0 && (
+                  <span className="ml-auto bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[20px] text-center">
+                    {unreadVendorRequestsCount}
                   </span>
                 )}
               </NavLink>
@@ -105,7 +136,7 @@ export function AdminSidebar() {
       <div className="p-4 border-t border-sidebar-border">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full text-sidebar-foreground/80 hover:bg-destructive hover:text-destructive-foreground transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full text-white hover:bg-white hover:text-gray-900 transition-colors"
         >
           <LogOut className="w-5 h-5" />
           Logout
