@@ -27,6 +27,7 @@ export default function VendorRequests() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialStatus = searchParams.get('status') || 'all';
+  const vendorId = searchParams.get('id'); // Get vendor ID from notification
   
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState(initialStatus);
@@ -35,9 +36,20 @@ export default function VendorRequests() {
   const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState({ total: 0, pages: 0 });
 
+  // Auto-navigate to vendor detail if coming from notification
   useEffect(() => {
-    loadVendors();
-  }, [currentPage, statusFilter, search]);
+    if (vendorId && typeof vendorId === 'string') {
+      // Use replace to avoid adding to history stack
+      navigate(`/vendor/${vendorId}`, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+  useEffect(() => {
+    if (!vendorId) { // Only load vendors if not redirecting
+      loadVendors();
+    }
+  }, [currentPage, statusFilter, search, vendorId]);
 
   const loadVendors = async () => {
     try {

@@ -42,9 +42,15 @@ export default function VendorDetail() {
   };
 
   const loadVendor = async () => {
+    if (!id || typeof id !== 'string') {
+      console.error('Invalid vendor ID:', id);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const response = await api.getVendorById(id!);
+      const response = await api.getVendorById(id);
       const normalizedVendor = normalizeVendor(response.data);
       setVendor(normalizedVendor);
       setSelectedCategory(normalizedVendor.paymentCategory || '');

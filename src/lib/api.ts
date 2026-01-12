@@ -774,6 +774,82 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // Notification APIs
+  async getNotifications(params?: {
+    limit?: number;
+    page?: number;
+    isRead?: boolean;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = queryParams.toString();
+    return this.request<{
+      success: boolean;
+      data: {
+        notifications: Notification[];
+        pagination: {
+          total: number;
+          page: number;
+          limit: number;
+          pages: number;
+        };
+        unreadCount: number;
+      };
+    }>(`/api/notifications${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async getUnreadNotificationCount() {
+    return this.request<{
+      success: boolean;
+      count: number;
+    }>('/api/notifications/unread-count');
+  }
+
+  async markNotificationAsRead(notificationId: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+      data: Notification;
+    }>(`/api/notifications/${notificationId}/read`, {
+      method: 'PATCH',
+    });
+  }
+
+  async markAllNotificationsAsRead() {
+    return this.request<{
+      success: boolean;
+      message: string;
+      modifiedCount: number;
+    }>('/api/notifications/mark-all-read', {
+      method: 'PATCH',
+    });
+  }
+
+  async deleteNotification(notificationId: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>(`/api/notifications/${notificationId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async clearReadNotifications() {
+    return this.request<{
+      success: boolean;
+      message: string;
+      deletedCount: number;
+    }>('/api/notifications/clear-read', {
+      method: 'DELETE',
+    });
+  }
 }
 
 // Payment interfaces
@@ -829,6 +905,36 @@ export interface VendorType {
   icon: string;
   isActive: boolean;
   order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Notification interface
+export interface Notification {
+  _id: string;
+  type: 'follow_up_update' | 'status_update';
+  vendorId: {
+    _id: string;
+    restaurantName: string;
+    restaurantStatus: 'pending' | 'publish' | 'reject';
+  } | string;
+  updatedBy: {
+    userId: string;
+    userName: string;
+    userRole: 'agent' | 'employee';
+  };
+  title: string;
+  message: string;
+  followUpDate: {
+    oldDate: string | null;
+    newDate: string | null;
+  };
+  vendorDetails: {
+    restaurantName: string;
+    restaurantStatus: 'pending' | 'publish' | 'reject';
+  };
+  isRead: boolean;
+  readAt?: string;
   createdAt: string;
   updatedAt: string;
 }
