@@ -73,7 +73,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="p-6 lg:p-8">
+      <div className="p-6 lg:p-8 bg-gray-300 min-h-screen">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/4"></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -87,7 +87,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Dashboard</h1>
@@ -115,7 +115,7 @@ export default function Dashboard() {
           variant="success"
         />
         <StatCard
-          title="Rejected Vendors"
+          title="Rejected Agent Requests"
           value={stats.rejected}
           icon={XCircle}
           variant="destructive"

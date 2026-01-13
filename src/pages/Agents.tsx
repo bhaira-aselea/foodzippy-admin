@@ -374,7 +374,7 @@ export default function Agents() {
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
@@ -421,13 +421,13 @@ export default function Agents() {
             placeholder="Search by name or username..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-12"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-card rounded-xl border overflow-hidden">
+      <div className="bg-white rounded-xl border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -678,7 +678,7 @@ export default function Agents() {
 
       {/* Agent Vendors Dialog */}
       <Dialog open={isVendorsDialogOpen} onOpenChange={setIsVendorsDialogOpen}>
-        <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Vendors - {selectedAgent?.name}</DialogTitle>
             <DialogDescription>
@@ -686,7 +686,7 @@ export default function Agents() {
             </DialogDescription>
           </DialogHeader>
           
-          <Tabs value={vendorTab} onValueChange={handleTabChange} className="flex-1 flex flex-col overflow-hidden">
+          <Tabs value={vendorTab} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="registered" className="relative">
                 Vendors Registered
@@ -715,7 +715,7 @@ export default function Agents() {
             </TabsList>
 
             {/* Registered Vendors Tab */}
-            <TabsContent value="registered" className="flex-1 overflow-y-auto mt-4">
+            <TabsContent value="registered" className="flex-1 mt-4">
               {isLoadingVendors ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-pulse text-muted-foreground">Loading vendors...</div>
@@ -725,7 +725,7 @@ export default function Agents() {
                   No approved vendors yet
                 </div>
               ) : (
-                <Table>
+                <Table>x
                   <TableHeader>
                     <TableRow>
                       <TableHead>Vendor Name</TableHead>
@@ -761,7 +761,7 @@ export default function Agents() {
             </TabsContent>
 
             {/* Requests Tab */}
-            <TabsContent value="requests" className="flex-1 overflow-y-auto mt-4 space-y-4">
+            <TabsContent value="requests" className="flex-1 mt-4 space-y-4">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <Label htmlFor="requests-filter">Filter by Date:</Label>
@@ -840,7 +840,7 @@ export default function Agents() {
             </TabsContent>
 
             {/* Follow-Ups Tab */}
-            <TabsContent value="followups" className="flex-1 overflow-y-auto mt-4 space-y-4">
+            <TabsContent value="followups" className="flex-1 mt-4 space-y-4">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <Label htmlFor="followup-filter">Filter by Date:</Label>

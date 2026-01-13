@@ -235,7 +235,7 @@ export default function AgentPaymentDetails() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex items-center justify-center bg-gray-300 p-6 lg:p-8 min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
@@ -243,7 +243,7 @@ export default function AgentPaymentDetails() {
 
   if (!agent) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 bg-gray-300 p-6 lg:p-8 min-h-screen">
         <p className="text-muted-foreground">Agent not found</p>
         <Button variant="outline" onClick={() => navigate('/payments')} className="mt-4">
           Back to Payments
@@ -253,7 +253,7 @@ export default function AgentPaymentDetails() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 lg:p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/payments')}>
@@ -310,13 +310,13 @@ export default function AgentPaymentDetails() {
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 pb-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <IndianRupee className="h-6 w-6 text-blue-600" />
+                <div className="p-6 bg-blue-100 rounded-lg">
+                  <IndianRupee className="h-8 w-8 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Earned</p>
+                  <p className="text-sm text-muted-foreground mb-1">Total Earned</p>
                   <p className="text-2xl font-bold">₹{stats.total.toLocaleString()}</p>
                 </div>
               </div>
@@ -324,13 +324,13 @@ export default function AgentPaymentDetails() {
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 pb-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-yellow-100 rounded-lg">
-                  <Clock className="h-6 w-6 text-yellow-600" />
+                <div className="p-4 bg-yellow-100 rounded-lg">
+                  <Clock className="h-8 w-8 text-yellow-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="text-sm text-muted-foreground mb-1">Pending</p>
                   <p className="text-2xl font-bold text-yellow-600">₹{stats.pending.toLocaleString()}</p>
                 </div>
               </div>
@@ -338,13 +338,13 @@ export default function AgentPaymentDetails() {
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 pb-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+                <div className="p-4 bg-green-100 rounded-lg">
+                  <CheckCircle className="h-8 w-8 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Paid</p>
+                  <p className="text-sm text-muted-foreground mb-1">Paid</p>
                   <p className="text-2xl font-bold text-green-600">₹{stats.paid.toLocaleString()}</p>
                 </div>
               </div>
@@ -352,13 +352,13 @@ export default function AgentPaymentDetails() {
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 pb-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <Store className="h-6 w-6 text-purple-600" />
+                <div className="p-4 bg-purple-100 rounded-lg">
+                  <Store className="h-8 w-8 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Vendors</p>
+                  <p className="text-sm text-muted-foreground mb-1">Vendors</p>
                   <p className="text-2xl font-bold">{stats.totalVendors}</p>
                 </div>
               </div>
@@ -420,21 +420,21 @@ export default function AgentPaymentDetails() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-center p-8 bg-blue-50 rounded-lg">
                 <p className="text-3xl font-bold text-blue-600">{stats.paymentCounts.visit}</p>
-                <p className="text-sm text-muted-foreground">Visits Paid</p>
+                <p className="text-sm text-muted-foreground mt-2">Visits Paid</p>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <div className="text-center p-8 bg-purple-50 rounded-lg">
                 <p className="text-3xl font-bold text-purple-600">{stats.paymentCounts.followup}</p>
-                <p className="text-sm text-muted-foreground">Follow-ups Paid</p>
+                <p className="text-sm text-muted-foreground mt-2">Follow-ups Paid</p>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-center p-8 bg-green-50 rounded-lg">
                 <p className="text-3xl font-bold text-green-600">{stats.paymentCounts.onboarding}</p>
-                <p className="text-sm text-muted-foreground">Onboardings</p>
+                <p className="text-sm text-muted-foreground mt-2">Onboardings</p>
               </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
+              <div className="text-center p-8 bg-yellow-50 rounded-lg">
                 <p className="text-3xl font-bold text-yellow-600">{stats.vendorCounts.onboarded}</p>
-                <p className="text-sm text-muted-foreground">Vendors Onboarded</p>
+                <p className="text-sm text-muted-foreground mt-2">Vendors Onboarded</p>
               </div>
             </div>
           </CardContent>

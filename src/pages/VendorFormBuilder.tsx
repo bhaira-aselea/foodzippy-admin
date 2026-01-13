@@ -199,7 +199,7 @@ export default function VendorFormBuilder() {
 
   if (loading && vendorTypes.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
+      <div className="flex items-center justify-center bg-gray-300 min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading form configuration...</p>
@@ -210,7 +210,7 @@ export default function VendorFormBuilder() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto py-6 bg-gray-300 min-h-screen">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -232,7 +232,7 @@ export default function VendorFormBuilder() {
 
   if (formConfig.length === 0) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto py-6 bg-gray-300 min-h-screen">
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -253,7 +253,7 @@ export default function VendorFormBuilder() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-6 space-y-6 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -555,7 +555,7 @@ export default function VendorFormBuilder() {
 
       {/* Preview Dialog */}
       <AlertDialog open={showPreview} onOpenChange={setShowPreview}>
-        <AlertDialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <AlertDialogContent className="max-w-[95vw] w-full max-h-[90vh] overflow-y-auto">
           <AlertDialogHeader>
             <AlertDialogTitle>Form Preview</AlertDialogTitle>
             <AlertDialogDescription>

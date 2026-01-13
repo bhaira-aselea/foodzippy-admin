@@ -132,7 +132,7 @@ export default function EmployeeAttendance() {
   );
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Employee Attendance</h1>
@@ -187,7 +187,7 @@ export default function EmployeeAttendance() {
                 placeholder="Search by name or username..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-12"
               />
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             </div>

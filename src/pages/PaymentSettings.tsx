@@ -22,19 +22,19 @@ const categoryInfo = {
   },
   B: {
     title: 'Category B',
-    description: 'Premium Hotels (non 5-star), Top B-class DineIns, Confectioneries, Sweet Shops, Restaurants',
+    description: 'Premium Hotels (non 5-4-3-star), Top B-class DineIns, Confectioneries, Sweet Shops, Restaurants, Cloud Kitchens',
     icon: Building2,
     color: 'bg-blue-500',
   },
   C: {
     title: 'Category C',
-    description: 'All vendors except A & B class',
+    description: 'All vendors except A & B class, Local Cloud Kitchens',
     icon: Home,
     color: 'bg-green-500',
   },
   D: {
     title: 'Category D',
-    description: 'All Local Street Vendors',
+    description: 'All Local Street Vendors and Small Vendors',
     icon: Store,
     color: 'bg-orange-500',
   },
@@ -191,7 +191,7 @@ export default function PaymentSettings() {
 
   if (isLoading) {
     return (
-      <div className="p-6 lg:p-8">
+      <div className="p-6 lg:p-8 bg-gray-300 min-h-screen">
         <div className="flex items-center justify-center min-h-[400px]">
           <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
@@ -200,7 +200,7 @@ export default function PaymentSettings() {
   }
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>

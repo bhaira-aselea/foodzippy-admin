@@ -41,10 +41,10 @@ export default function AllVendors() {
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">All Vendors</h1>
+        <h1 className="text-2xl font-bold">Published Vendors</h1>
         <p className="text-muted-foreground">List of all published vendors</p>
       </div>
 
@@ -56,7 +56,7 @@ export default function AllVendors() {
             placeholder="Search by name or city..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-12"
           />
         </div>
       </div>

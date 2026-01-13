@@ -97,7 +97,7 @@ export default function VendorRequests() {
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Vendor Requests</h1>
@@ -109,17 +109,17 @@ export default function VendorRequests() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name, city, or mobile..."
+            placeholder="Search by vendor name, city, mobile, or agent name..."
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-12"
           />
         </div>
         <Select
           value={statusFilter}
           onValueChange={handleStatusChange}
         >
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40 h-12">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>

@@ -179,7 +179,7 @@ export default function EditRequests() {
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8  bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>

@@ -30,6 +30,7 @@ interface AgentProfile {
   dob: string | null;
   age: number | null;
   agentType: string;
+  role?: string;
   profileImage: string;
   isActive: boolean;
 }
@@ -294,7 +295,7 @@ export default function AgentProfileDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-300">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
@@ -302,14 +303,14 @@ export default function AgentProfileDetail() {
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-300">
         <p className="text-muted-foreground">Agent not found</p>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="mb-8">
         <Button
@@ -360,7 +361,7 @@ export default function AgentProfileDetail() {
                     <Badge variant="secondary">{profile.agentType}</Badge>
                   </div>
                 </div>
-                <Button onClick={openEditDialog} className="mt-2">
+                <Button onClick={openEditDialog} className="mt-2 bg-white text-black">
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Profile
                 </Button>
@@ -443,15 +444,17 @@ export default function AgentProfileDetail() {
 
       {/* Tabs for Requests and Attendance */}
       <Tabs defaultValue="requests" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className={`grid w-full max-w-md ${profile?.role === 'employee' ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <TabsTrigger value="requests">
             <FileText className="w-4 h-4 mr-2" />
             Vendor Requests
           </TabsTrigger>
-          <TabsTrigger value="attendance">
-            <Clock className="w-4 h-4 mr-2" />
-            Attendance
-          </TabsTrigger>
+          {profile?.role === 'employee' && (
+            <TabsTrigger value="attendance">
+              <Clock className="w-4 h-4 mr-2" />
+              Attendance
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Vendor Requests Tab */}
@@ -520,8 +523,9 @@ export default function AgentProfileDetail() {
           </div>
         </TabsContent>
 
-        {/* Attendance Tab */}
-        <TabsContent value="attendance" className="mt-6">
+        {/* Attendance Tab - Only for Employees */}
+        {profile?.role === 'employee' && (
+          <TabsContent value="attendance" className="mt-6">
           {/* Attendance Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-card rounded-xl border p-6">
@@ -661,6 +665,7 @@ export default function AgentProfileDetail() {
             </div>
           </div>
         </TabsContent>
+        )}
       </Tabs>
 
       {/* Edit Profile Dialog */}

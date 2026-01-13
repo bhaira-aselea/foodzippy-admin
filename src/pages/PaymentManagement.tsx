@@ -165,7 +165,7 @@ export default function PaymentManagement() {
   const totalPaid = agentSummaries.reduce((sum, a) => sum + a.paidAmount, 0);
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -183,13 +183,13 @@ export default function PaymentManagement() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 pb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-yellow-100">
-                <Clock className="w-6 h-6 text-yellow-600" />
+              <div className="p-4 rounded-full bg-yellow-100">
+                <Clock className="w-8 h-8 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
+                <p className="text-sm text-muted-foreground mb-1">Pending</p>
                 <p className="text-2xl font-bold text-yellow-600">
                   {formatCurrency(activeTab === 'by-agent' ? totalPending : stats.pending)}
                 </p>
@@ -198,13 +198,13 @@ export default function PaymentManagement() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 pb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-green-100">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+              <div className="p-4 rounded-full bg-green-100">
+                <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Paid</p>
+                <p className="text-sm text-muted-foreground mb-1">Paid</p>
                 <p className="text-2xl font-bold text-green-600">
                   {formatCurrency(activeTab === 'by-agent' ? totalPaid : stats.paid)}
                 </p>
@@ -213,26 +213,26 @@ export default function PaymentManagement() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 pb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-blue-100">
-                <Users className="w-6 h-6 text-blue-600" />
+              <div className="p-4 rounded-full bg-blue-100">
+                <Users className="w-8 h-8 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Agents</p>
+                <p className="text-sm text-muted-foreground mb-1">Agents</p>
                 <p className="text-2xl font-bold">{agentSummaries.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 pb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-purple-100">
-                <IndianRupee className="w-6 h-6 text-purple-600" />
+              <div className="p-4 rounded-full bg-purple-100">
+                <IndianRupee className="w-8 h-8 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-sm text-muted-foreground mb-1">Total</p>
                 <p className="text-2xl font-bold">
                   {formatCurrency(activeTab === 'by-agent' ? totalPending + totalPaid : stats.pending + stats.paid)}
                 </p>

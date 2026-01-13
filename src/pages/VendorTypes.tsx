@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, GripVertical, Store, Coffee, Hotel, Cake, Candy, AlertCircle, Check, X } from 'lucide-react';
+import { Plus, Edit, Trash2, GripVertical, Store, Coffee, Hotel, Cake, Candy, AlertCircle, Check, X, Utensils, UtensilsCrossed, Beer, Wine, GlassWater, Pizza, IceCream2, Soup, Music, PartyPopper, Drumstick, Leaf, Salad } from 'lucide-react';
 import { api, VendorType } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,6 +42,19 @@ const ICON_OPTIONS = [
   { value: 'hotel', label: 'Hotel', icon: Hotel },
   { value: 'cake', label: 'Cake', icon: Cake },
   { value: 'candy', label: 'Candy', icon: Candy },
+  { value: 'utensils', label: 'Restaurant', icon: Utensils },
+  { value: 'utensilsCrossed', label: 'Fine Dining', icon: UtensilsCrossed },
+  { value: 'beer', label: 'Bar/Pub', icon: Beer },
+  { value: 'wine', label: 'Wine Bar', icon: Wine },
+  { value: 'glassWater', label: 'Beverage', icon: GlassWater },
+  { value: 'pizza', label: 'Pizza', icon: Pizza },
+  { value: 'iceCream', label: 'Ice Cream', icon: IceCream2 },
+  { value: 'soup', label: 'Soup/Noodles', icon: Soup },
+  { value: 'music', label: 'Club', icon: Music },
+  { value: 'partyPopper', label: 'Event Venue', icon: PartyPopper },
+  { value: 'drumstick', label: 'Non-Veg', icon: Drumstick },
+  { value: 'leaf', label: 'Veg/Organic', icon: Leaf },
+  { value: 'salad', label: 'Healthy Food', icon: Salad },
 ];
 
 const getIconComponent = (iconName: string) => {
@@ -192,14 +205,14 @@ export default function VendorTypes() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center bg-gray-300 min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-6 lg:p-8 space-y-6 bg-gray-300 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -251,8 +264,8 @@ export default function VendorTypes() {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${type.isActive ? 'bg-orange-100' : 'bg-gray-200'}`}>
-                      <IconComponent className={`w-6 h-6 ${type.isActive ? 'text-orange-600' : 'text-gray-500'}`} />
+                    <div className={`p-2 rounded-lg ${type.isActive ? 'bg-red-100' : 'bg-gray-200'}`}>
+                      <IconComponent className={`w-6 h-6 ${type.isActive ? 'text-[#E82335]' : 'text-gray-500'}`} />
                     </div>
                     <div>
                       <CardTitle className="text-lg">{type.name}</CardTitle>
@@ -261,7 +274,10 @@ export default function VendorTypes() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant={type.isActive ? 'default' : 'secondary'}>
+                  <Badge 
+                    className={type.isActive ? 'bg-green-500 hover:bg-green-600 text-white border-transparent' : ''}
+                    variant={type.isActive ? 'default' : 'secondary'}
+                  >
                     {type.isActive ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>

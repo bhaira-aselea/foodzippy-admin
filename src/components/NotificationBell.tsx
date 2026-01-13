@@ -138,9 +138,9 @@ export function NotificationBell() {
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon"
-          className="relative"
+          className="relative bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50"
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />

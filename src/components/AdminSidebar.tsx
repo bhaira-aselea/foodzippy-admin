@@ -8,11 +8,10 @@ import { api } from '@/lib/api';
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Vendors Request', url: '/vendor-requests', icon: ClipboardList, showBadge: true },
-  { title: 'All Vendors', url: '/vendors', icon: Users },
+  { title: 'Published Vendors', url: '/vendors', icon: Users },
   { title: 'Vendor Types', url: '/vendor-types', icon: Store },
   { title: 'Vendor Form Builder', url: '/vendor-form-builder', icon: Settings },
   { title: 'Agents', url: '/agents', icon: UserCog },
-  { title: 'Agent Attendance', url: '/agent-attendance', icon: ClipboardCheck },
   { title: 'Employee Attendance', url: '/employee-attendance', icon: Briefcase },
   { title: 'Payments', url: '/payments', icon: Wallet },
   { title: 'Payment Settings', url: '/payment-settings', icon: IndianRupee },
