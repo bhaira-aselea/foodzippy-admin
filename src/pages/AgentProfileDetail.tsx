@@ -210,12 +210,15 @@ export default function AgentProfileDetail() {
 
   const openEditDialog = () => {
     if (profile) {
+      // Set default agentType based on role if not already set
+      const defaultAgentType = profile.agentType || (profile.role === 'employee' ? 'Junior-Employee' : 'Junior-Agent');
+      
       setEditFormData({
         email: profile.email || '',
         phone: profile.phone || '',
         alternatePhone: profile.alternatePhone || '',
         dob: profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : '',
-        agentType: profile.agentType || 'Field Agent',
+        agentType: defaultAgentType,
         isActive: profile.isActive,
       });
       setSelectedProfileImage(null);
@@ -746,10 +749,20 @@ export default function AgentProfileDetail() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Field Agent">Field Agent</SelectItem>
-                  <SelectItem value="Office Agent">Office Agent</SelectItem>
-                  <SelectItem value="Senior Agent">Senior Agent</SelectItem>
-                  <SelectItem value="Manager">Manager</SelectItem>
+                  {profile?.role === 'employee' ? (
+                    // Options for Employees
+                    <>
+                      <SelectItem value="Junior-Employee">Junior-Employee</SelectItem>
+                      <SelectItem value="Assistant-Manager">Assistant-Manager</SelectItem>
+                      <SelectItem value="Manager">Manager</SelectItem>
+                    </>
+                  ) : (
+                    // Options for Agents (or legacy Agent model)
+                    <>
+                      <SelectItem value="Junior-Agent">Junior-Agent</SelectItem>
+                      <SelectItem value="Senior-Agent">Senior-Agent</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
