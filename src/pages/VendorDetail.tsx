@@ -22,6 +22,11 @@ export default function VendorDetail() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedVisitStatus, setSelectedVisitStatus] = useState<string>('');
   const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
+  
+  // Listing charge states
+  const [selectedListingType, setSelectedListingType] = useState<'launching' | 'vip' | 'normal'>('launching');
+  const [listingCharge, setListingCharge] = useState<number>(0);
+  const [isUpdatingListing, setIsUpdatingListing] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -55,6 +60,8 @@ export default function VendorDetail() {
       setVendor(normalizedVendor);
       setSelectedCategory(normalizedVendor.paymentCategory || '');
       setSelectedVisitStatus(normalizedVendor.visitStatus || 'pending-visit');
+      setSelectedListingType(normalizedVendor.listingType || 'launching');
+      setListingCharge(normalizedVendor.listingCharge || 0);
     } catch (error) {
       console.error('Failed to load vendor:', error);
       setVendor(null);
@@ -109,6 +116,58 @@ export default function VendorDetail() {
       });
     } finally {
       setIsUpdatingPayment(false);
+    }
+  };
+
+  const handleListingChargeUpdate = async () => {
+    try {
+      setIsUpdatingListing(true);
+      const token = localStorage.getItem('admin_token'); // Changed from 'adminToken' to 'admin_token'
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      
+      const response = await fetch(`${apiUrl}/api/admin/vendors/${id}/listing-charge`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ listingCharge }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Also update listing type
+        const updateResponse = await fetch(`${apiUrl}/api/admin/vendors/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ listingType: selectedListingType }),
+        });
+
+        toast({
+          title: 'Success',
+          description: 'Listing charge updated successfully',
+        });
+        
+        setVendor((prev: any) => ({
+          ...prev,
+          listingType: selectedListingType,
+          listingCharge: listingCharge,
+        }));
+      } else {
+        throw new Error(data.message || 'Failed to update');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update listing charge',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdatingListing(false);
     }
   };
 
@@ -704,6 +763,145 @@ export default function VendorDetail() {
                   <>
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Update Payment Status
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Vendor Listing Charge Section */}
+          <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-purple-700">
+                <IndianRupee className="w-5 h-5" />
+                Vendor Listing Charge
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Listing Type Selection */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-3 block">
+                  Listing Type
+                </label>
+                <div className="grid grid-cols-1 gap-2">
+                  {/* Launching */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedListingType('launching');
+                      setListingCharge(0);
+                    }}
+                    className={`p-3 rounded-lg border-2 text-left transition-all ${
+                      selectedListingType === 'launching' 
+                        ? 'border-green-500 bg-green-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🚀</span>
+                      <div className="flex-1">
+                        <span className="font-medium block">Launching</span>
+                        <p className="text-xs text-muted-foreground">Perfect for new vendors - FREE</p>
+                      </div>
+                      <span className="font-bold text-green-600">₹0</span>
+                    </div>
+                  </button>
+
+                  {/* VIP */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedListingType('vip')}
+                    className={`p-3 rounded-lg border-2 text-left transition-all ${
+                      selectedListingType === 'vip' 
+                        ? 'border-yellow-500 bg-yellow-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">⭐</span>
+                      <div className="flex-1">
+                        <span className="font-medium block">VIP</span>
+                        <p className="text-xs text-muted-foreground">Premium visibility</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Normal */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedListingType('normal')}
+                    className={`p-3 rounded-lg border-2 text-left transition-all ${
+                      selectedListingType === 'normal' 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">📋</span>
+                      <div className="flex-1">
+                        <span className="font-medium block">Normal</span>
+                        <p className="text-xs text-muted-foreground">Standard listing</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Charge Input (only for VIP and Normal) */}
+              {selectedListingType !== 'launching' && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Listing Charge Amount
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600">₹</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={listingCharge}
+                      onChange={(e) => setListingCharge(parseFloat(e.target.value) || 0)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Enter charge amount"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Current Listing Info */}
+              {vendor.listingType && (
+                <div className="bg-white rounded-lg p-3 border border-purple-200">
+                  <p className="text-xs text-muted-foreground">Current Listing Type</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge className={`${
+                      vendor.listingType === 'launching' ? 'bg-green-100 text-green-800' :
+                      vendor.listingType === 'vip' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {vendor.listingType === 'launching' && '🚀 Launching'}
+                      {vendor.listingType === 'vip' && '⭐ VIP'}
+                      {vendor.listingType === 'normal' && '📋 Normal'}
+                    </Badge>
+                    <span className="text-sm font-medium">₹{vendor.listingCharge || 0}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Update Button */}
+              <Button 
+                className="w-full bg-purple-600 hover:bg-purple-700" 
+                onClick={handleListingChargeUpdate}
+                disabled={isUpdatingListing}
+              >
+                {isUpdatingListing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Update Listing Charge
                   </>
                 )}
               </Button>
