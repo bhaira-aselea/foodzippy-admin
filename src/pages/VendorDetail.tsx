@@ -987,8 +987,8 @@ export default function VendorDetail() {
             </div>
           )}
 
-          {/* Dynamic Form Data Section */}
-          {vendor.formData && Object.keys(vendor.formData).length > 0 && (
+          {/* Dynamic Form Data Section - Hidden */}
+          {/* {vendor.formData && Object.keys(vendor.formData).length > 0 && (
             <div className="bg-card rounded-xl border p-6">
               <h2 className="text-lg font-semibold mb-4">Additional Form Data</h2>
               <div className="grid grid-cols-2 gap-4">
@@ -1008,7 +1008,7 @@ export default function VendorDetail() {
                 ))}
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

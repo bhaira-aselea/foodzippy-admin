@@ -335,30 +335,6 @@ export default function VendorCharges() {
             )}
           </div>
         </div>
-
-        {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          {(Object.keys(tabConfig) as ListingTab[]).map((tab) => {
-            const config = tabConfig[tab];
-            const tabVendors = vendors.filter(v => v.listingType === tab);
-            const totalCharge = tabVendors.reduce((sum, v) => sum + v.listingCharge, 0);
-            
-            return (
-              <div key={tab} className={`${config.bgColor} border-2 ${config.borderColor} rounded-lg p-6`}>
-                <div className="text-3xl mb-2">{config.icon}</div>
-                <h3 className={`font-bold ${config.textColor}`}>{config.label}</h3>
-                <p className="text-2xl font-bold text-gray-900 mt-2">
-                  {tabVendors.length} vendors
-                </p>
-                {tab !== 'launching' && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    Total: ₹{totalCharge.toLocaleString()}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );
